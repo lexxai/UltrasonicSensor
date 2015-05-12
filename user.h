@@ -15,7 +15,7 @@ volatile union {
     GPIObits_t bits;
 } LATGPIO;
 
-#define LATPORTC_FLUSH GPIO = LATGPIO.byte
+#define LATGPIO_FLUSH GPIO = LATGPIO.byte
 
 
 #define ULTRASONIC_TRIGGER              LATGPIO.bits.GP5

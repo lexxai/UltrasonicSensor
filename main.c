@@ -31,9 +31,9 @@
 #define DISTANCE_LIMIT_HIGH     400
 #define DISTANCE_SET            15
 
-#define MAX_COUNT_TRY_PRESENT   4
-#define MAX_COUNT_TRY_EMPTY     8
-#define MAX_COUNT_TRY_DOOR      6
+#define MAX_COUNT_TRY_PRESENT   8
+#define MAX_COUNT_TRY_EMPTY     16
+#define MAX_COUNT_TRY_DOOR      4
 
 void main(void) {
     /* Configure the oscillator for the device */
@@ -44,44 +44,47 @@ void main(void) {
 
     countActionEmpty = 0;
     countActionPresent = 0;
+    countActionDoor = 0;
     
-    //RELAY = 0; // RELAY OFF;
+    RELAY = 1; // RELAY ON;
+    LATGPIO_FLUSH;
 
     while (1) {
-        //CLRWDT();
+        CLRWDT();
         //check door sensor
-//        if (DOOR_SENSOR) {
-//            countActionDoor++;
-//        } else {
-//            countActionDoor = 0;
-//        }
-            
-//        if (countActionDoor > MAX_COUNT_TRY_DOOR ) {
-//            //door opened will skip measure distance
-//            countActionDoor = 0;
-//            countActionPresent = MAX_COUNT_TRY_PRESENT+1;
-//        } else {
+        if (DOOR_SENSOR) {
+            countActionDoor++;
+        } else {
+            countActionDoor = 0;
+        }
+
+        if (countActionDoor >= MAX_COUNT_TRY_DOOR) {
+            //door opened will skip measure distance
+            countActionPresent = MAX_COUNT_TRY_PRESENT;
+            countActionEmpty = 0;
+            countActionDoor = MAX_COUNT_TRY_DOOR;
+            a=0;
+        } else {
             // start measure disance 
             TMR1H = 0; //Sets the Initial Value of Timer
             TMR1L = 0; //Sets the Initial Value of Timer
 
             ULTRASONIC_TRIGGER = 1; //TRIGGER HIGH
-            LATPORTC_FLUSH;
+            LATGPIO_FLUSH;
             __delay_us(10); //10uS Delay 
             ULTRASONIC_TRIGGER = 0; //TRIGGER LOW
-            LATPORTC_FLUSH;
+            LATGPIO_FLUSH;
 
             while (!ULTRASONIC_ECHO); //Waiting for Echo
             TMR1ON = 1; //Timer Starts
             while (ULTRASONIC_ECHO); //Waiting for Echo goes LOW
-            //__delay_us(1588);
             TMR1ON = 0; //Timer Stops
 
             a = (TMR1L | (TMR1H << 8)); //Reads Timer Value
-            a = (int) ( a / 58); //Converts Time to Distance
+            a = (int) (a / 58); //Converts Time to Distance
             a = a + 1; //Distance Calibration
             // end measuring disance 
-//        }
+        }
         
         if (a >= DISTANCE_LIMIT_LOW && a <= DISTANCE_LIMIT_HIGH) //Check whether the result is valid or not
         {
@@ -94,18 +97,18 @@ void main(void) {
             }
         }
 
-        if (countActionPresent > MAX_COUNT_TRY_PRESENT) {
+        if (countActionPresent >= MAX_COUNT_TRY_PRESENT) {
             RELAY = 1; //RELAY ON 
-            LATPORTC_FLUSH;
+            LATGPIO_FLUSH;
             countActionPresent = 0;
         }
-        if (countActionEmpty > 6) {
+        if (countActionEmpty >= MAX_COUNT_TRY_EMPTY) {
             RELAY = 0; //RELAY OFF
-            LATPORTC_FLUSH;
+            LATGPIO_FLUSH;
             countActionEmpty = 0;
         }
 
 
-        __delay_ms(250);
+        __delay_ms(125);
     }
 }
