@@ -16,6 +16,8 @@
 
 
 
+
+
 /******************************************************************************/
 /* User Global Variable Declaration                                           */
 /******************************************************************************/
@@ -35,6 +37,7 @@
 #define MAX_COUNT_TRY_EMPTY     16
 #define MAX_COUNT_TRY_DOOR      4
 
+
 void main(void) {
     /* Configure the oscillator for the device */
     ConfigureOscillator();
@@ -45,8 +48,9 @@ void main(void) {
     countActionEmpty = 0;
     countActionPresent = 0;
     countActionDoor = 0;
-    
-    RELAY = 1; // RELAY ON;
+
+    ULTRASONIC_TRIGGER = 0; // START POS TRIGGER LOW
+    RELAY = 1;              // RELAY ON;
     LATGPIO_FLUSH;
 
     while (1) {
@@ -66,22 +70,13 @@ void main(void) {
             a=0;
         } else {
             // start measure disance 
-            TMR1H = 0; //Sets the Initial Value of Timer
-            TMR1L = 0; //Sets the Initial Value of Timer
-
             ULTRASONIC_TRIGGER = 1; //TRIGGER HIGH
             LATGPIO_FLUSH;
             __delay_us(10); //10uS Delay 
             ULTRASONIC_TRIGGER = 0; //TRIGGER LOW
             LATGPIO_FLUSH;
 
-            while (!ULTRASONIC_ECHO); //Waiting for Echo
-            TMR1ON = 1; //Timer Starts
-            while (ULTRASONIC_ECHO); //Waiting for Echo goes LOW
-            TMR1ON = 0; //Timer Stops
-
-            a = (TMR1L | (TMR1H << 8)); //Reads Timer Value
-            a = (int) (a / 58); //Converts Time to Distance
+            __delay_ms(100);   // WAIT ECHO
             a = a + 1; //Distance Calibration
             // end measuring disance 
         }

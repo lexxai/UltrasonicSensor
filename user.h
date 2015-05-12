@@ -24,6 +24,7 @@ volatile union {
 
 #define ULTRASONIC_ECHO                 GP2
 #define ULTRASONIC_ECHO_BIT             GP2_bit
+#define ULTRASONIC_ECHO_MASK            _GPIO_GP2_MASK
 #define ULTRASONIC_ECHO_TRISBIT         TRISIObits.TRISIO2
 
 #define DOOR_SENSOR                     GP4
@@ -34,10 +35,11 @@ volatile union {
 #define RELAY_BIT                       GP1_bit
 #define RELAY_TRISBIT                   TRISIObits.TRISIO1
 
-int a;
+volatile int a;
 int countActionPresent;
 int countActionEmpty;
 int countActionDoor;
+
 
 
 
