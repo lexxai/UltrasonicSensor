@@ -1,0 +1,7 @@
+___awdiv: CODE, 167 0 69
+_ConfigureOscillator: CODE, 267 0 1
+_main: CODE, 16 0 151
+_InitApp: CODE, 236 0 15
+__initialization: CODE, 251 0 7
+_isr: CODE, 260 0 7
+Total: 250
