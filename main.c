@@ -22,20 +22,32 @@
 /* User Global Variable Declaration                                           */
 /******************************************************************************/
 
-/* i.e. uint8_t <variable_name>; */
+volatile int distance;
+unsigned char countActionPresent;
+unsigned char countActionEmpty;
+unsigned char countActionDoor;
+unsigned int TimerStateOn;
 
 /******************************************************************************/
 /* Main Program                                                               */
 
 /******************************************************************************/
 
-#define DISTANCE_LIMIT_LOW      2
-#define DISTANCE_LIMIT_HIGH     400
-#define DISTANCE_SET            15
+#define DISTANCE_LIMIT_LOW      2                    //cm
+#define DISTANCE_LIMIT_HIGH     400                  //cm
+#define DISTANCE_SET            15                   //cm
 
-#define MAX_COUNT_TRY_PRESENT   8
-#define MAX_COUNT_TRY_EMPTY     16
-#define MAX_COUNT_TRY_DOOR      4
+#define ECHO_WAIT               125                  //ms
+#define ECHO_WAIT_PER_SEC       1000/ECHO_WAIT       //loops per second
+
+#define MAX_COUNT_TRY_PRESENT   ECHO_WAIT_PER_SEC*1  //seconds
+#define MAX_COUNT_TRY_EMPTY     ECHO_WAIT_PER_SEC*3  //seconds
+#define MAX_COUNT_TRY_DOOR      ECHO_WAIT_PER_SEC*1  //seconds
+
+#define MINUTES                 60                    //seconds
+#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*15 //minutes
+#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*1 //minutes
+
 
 
 void main(void) {
@@ -50,7 +62,7 @@ void main(void) {
     countActionDoor = 0;
 
     ULTRASONIC_TRIGGER = 0; // START POS TRIGGER LOW
-    RELAY = 1;              // RELAY ON;
+    RELAY = 1;              // RELAY ON WHEH POWER ON;
     LATGPIO_FLUSH;
 
     while (1) {
@@ -62,28 +74,26 @@ void main(void) {
             countActionDoor = 0;
         }
 
+        distance=0;                    //reset distance
         if (countActionDoor >= MAX_COUNT_TRY_DOOR) {
             //door opened will skip measure distance
             countActionPresent = MAX_COUNT_TRY_PRESENT;
             countActionEmpty = 0;
             countActionDoor = MAX_COUNT_TRY_DOOR;
-            a=0;
         } else {
             // start measure disance 
-            ULTRASONIC_TRIGGER = 1; //TRIGGER HIGH
+            ULTRASONIC_TRIGGER = 1;         //TRIGGER HIGH
             LATGPIO_FLUSH;
-            __delay_us(10); //10uS Delay 
-            ULTRASONIC_TRIGGER = 0; //TRIGGER LOW
+            __delay_us(10);                 //10uS Delay 
+            ULTRASONIC_TRIGGER = 0;         //TRIGGER LOW
             LATGPIO_FLUSH;
-
-            __delay_ms(100);   // WAIT ECHO
-            a = a + 1; //Distance Calibration
+            __delay_ms(ECHO_WAIT);          // WAIT ECHO
             // end measuring disance 
         }
         
-        if (a >= DISTANCE_LIMIT_LOW && a <= DISTANCE_LIMIT_HIGH) //Check whether the result is valid or not
+        if (distance >= DISTANCE_LIMIT_LOW && distance <= DISTANCE_LIMIT_HIGH) //Check whether the result is valid or not
         {
-            if (a <= DISTANCE_SET) {
+            if (distance <= DISTANCE_SET) {
                 countActionPresent++;
                 countActionEmpty = 0;                
             } else {
@@ -92,18 +102,30 @@ void main(void) {
             }
         }
 
+      
         if (countActionPresent >= MAX_COUNT_TRY_PRESENT) {
             RELAY = 1; //RELAY ON 
-            LATGPIO_FLUSH;
             countActionPresent = 0;
         }
         if (countActionEmpty >= MAX_COUNT_TRY_EMPTY) {
             RELAY = 0; //RELAY OFF
-            LATGPIO_FLUSH;
             countActionEmpty = 0;
+            TimerStateOn = 0;
         }
 
-
-        __delay_ms(125);
+        //checking safety MAX time of State ON
+        if ((TimerStateOn >= MAX_TIME_ON)) {
+            RELAY = 0; //RELAY OFF
+            TimerStateOn = MAX_TIME_ON;
+        } else if ((TimerStateOn >= MAX_DOOR_TIME_ON) && (countActionDoor >= MAX_COUNT_TRY_DOOR)) {
+            RELAY = 0; //RELAY OFF
+            TimerStateOn = MAX_DOOR_TIME_ON;
+        } else if (RELAY) {
+            TimerStateOn++;
+        } else {
+            TimerStateOn = 0;
+        }
+        
+        LATGPIO_FLUSH;            
     }
 }

@@ -35,12 +35,6 @@ volatile union {
 #define RELAY_BIT                       GP1_bit
 #define RELAY_TRISBIT                   TRISIObits.TRISIO1
 
-volatile int a;
-int countActionPresent;
-int countActionEmpty;
-int countActionDoor;
-
-
 
 
 

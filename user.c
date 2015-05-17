@@ -48,7 +48,6 @@ void InitApp(void) {
     /* Enable interrupts */
     GPIF = 0; //Clear GPIO On-Change Interrupt Flag
     IOC = ULTRASONIC_ECHO_MASK; //Enable On-Change Interrupt GPIO for ULTRASONIC_ECHO 
-    IOCbits.IOC2=1;
     GPIE = 1; //Enable GPIO On-Change Interrupt
     GIE = 1; //Global Interrupt Enable
 
