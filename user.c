@@ -34,6 +34,8 @@ void InitApp(void) {
 
     DOOR_SENSOR_TRISBIT = 1; //IN
     RELAY_TRISBIT = 0; //OUT
+    
+    ULTRASONIC_POWER_TRISBIT  = 0; //OUT  
 
 
     /* Initialize peripherals */

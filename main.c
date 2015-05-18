@@ -27,7 +27,9 @@ uint8_t countActionPresent;
 uint8_t countActionEmpty;
 uint8_t countActionDoor;
 uint16_t TimerStateOn;
+uint16_t TimerStateOff;
 //bool    doorStateChanged = false;
+bool   UltraSonicPower=true;
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -48,6 +50,7 @@ uint16_t TimerStateOn;
 #define MINUTES                 60                    //seconds
 #define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*15 //minutes
 #define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*60 //minutes
+#define TIME_OFF_DELAY          ECHO_WAIT_PER_SEC*MINUTES/2 //minutes
 
 
 
@@ -68,6 +71,14 @@ void main(void) {
 
     while (1) {
         CLRWDT();
+        
+        if (UltraSonicPower) {
+            // power on of ultrasonic module
+            ULTRASONIC_POWER = true;
+            LATGPIO_FLUSH;
+            __delay_us(10); //10uS Delay for start module
+        }
+        
         //check door sensor
         if (DOOR_SENSOR) {
             countActionDoor++;
@@ -76,12 +87,15 @@ void main(void) {
         }
 
         distance=0;                    //reset distance
+       
         // checking door sensor
         if (countActionDoor >= MAX_COUNT_TRY_DOOR) {
             //if door opened, will skip measure distance
             countActionPresent = MAX_COUNT_TRY_PRESENT;
             countActionEmpty = 0;
             countActionDoor = MAX_COUNT_TRY_DOOR;
+            __delay_ms(ECHO_WAIT);          // SIMULTATE WAIT ECHO
+            UltraSonicPower=true;
         } else {
             // if door opened 
             // start measure disance 
@@ -112,11 +126,20 @@ void main(void) {
         if (countActionPresent >= MAX_COUNT_TRY_PRESENT) {
             RELAY = 1; //RELAY ON 
             countActionPresent = 0;
+            TimerStateOff = 0;
         }
         if (countActionEmpty >= MAX_COUNT_TRY_EMPTY) {
             RELAY = 0; //RELAY OFF
             countActionEmpty = 0;
             TimerStateOn = 0;
+        }
+        
+        if (RELAY = 0) {
+            TimerStateOff++;
+            if (TimerStateOff >= TIME_OFF_DELAY) {
+                UltraSonicPower = false;
+                TimerStateOff = TIME_OFF_DELAY;
+            }
         }
 
         //checking safety MAX time of State ON

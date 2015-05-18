@@ -8,6 +8,9 @@ volatile union {
 
 #define LATGPIO_FLUSH GPIO = LATGPIO.byte
 
+#define ULTRASONIC_POWER                LATGPIO.bits.GP0
+#define ULTRASONIC_POWER_BIT            GP0_bit
+#define ULTRASONIC_POWER_TRISBIT        TRISIObits.TRISIO0
 
 #define ULTRASONIC_TRIGGER              LATGPIO.bits.GP5
 #define ULTRASONIC_TRIGGER_BIT          GP5_bit
