@@ -44,6 +44,10 @@ void InitApp(void) {
     T1CONbits.T1CKPS = 0x00; // prescaler timer1 1:1. 1:1 = 1Mhz
     T1CONbits.T1OSCEN = 0; // disable LP.
     T1CONbits.TMR1ON = 0; // disable timer1.
+    
+    /* Initialize TIMER 0 PRESCASLER FOR WATCHDOG */ 
+    OPTION_REGbits.PSA =  1;       // Use internal Watchdog timer ~18ms
+    OPTION_REGbits.PS  =  0b101;   // WDT rate 1:32, ~576ms
 
     /* Enable interrupts */
     GPIF = 0; //Clear GPIO On-Change Interrupt Flag

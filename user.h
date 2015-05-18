@@ -1,15 +1,6 @@
 /******************************************************************************/
 /* User Level #define Macros                                                  */
 /******************************************************************************/
-
-/* TODO Application specific user parameters used in user.c may go here */
-
-/******************************************************************************/
-/* User Function Prototypes                                                   */
-/******************************************************************************/
-
-/* TODO User level functions prototypes (i.e. InitApp) go here */
-
 volatile union {
     unsigned char byte;
     GPIObits_t bits;
@@ -35,7 +26,10 @@ volatile union {
 #define RELAY_BIT                       GP1_bit
 #define RELAY_TRISBIT                   TRISIObits.TRISIO1
 
+/* TODO Application specific user parameters used in user.c may go here */
 
-
+/******************************************************************************/
+/* User Function Prototypes                                                   */
+/******************************************************************************/
 
 void InitApp(void);         /* I/O and Peripheral Initialization */

@@ -625,13 +625,13 @@ Version 3.2 HI-TECH Software Intermediate Code
 "36 configuration_bits.c
 [p x FOSC=INTRCIO ]
 "37
-[p x WDTE=OFF ]
+[p x WDTE=ON ]
 "38
-[p x PWRTE=OFF ]
+[p x PWRTE=ON ]
 "39
 [p x MCLRE=OFF ]
 "40
-[p x BOREN=OFF ]
+[p x BOREN=ON ]
 "41
 [p x CP=OFF ]
 "42

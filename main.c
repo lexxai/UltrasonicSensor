@@ -46,7 +46,7 @@ unsigned int TimerStateOn;
 
 #define MINUTES                 60                    //seconds
 #define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*15 //minutes
-#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*1 //minutes
+#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*60 //minutes
 
 
 
