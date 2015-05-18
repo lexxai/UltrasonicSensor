@@ -22,7 +22,7 @@
 
 #ifndef _PIC12
 
-extern volatile int distance;
+extern volatile uint16_t distance;
 
 void interrupt isr(void) {
     /* This code stub shows general interrupt handling.  Note that these
@@ -35,14 +35,14 @@ void interrupt isr(void) {
     if (GPIF == 1) //Makes sure that it is GP On-Change Interrupt
     {
         GPIE = 0; //Disable On-Change Interrupt
-        if (ULTRASONIC_ECHO == 1) //If ECHO is HIGH
-            TMR1H = 0;                         //Setting Initial Value of Timer
-            TMR1L = 0;                         //Setting Initial Value of Timer            
+        if (ULTRASONIC_ECHO == 1)     //If ECHO is HIGH
+            TMR1H = 0;                //Setting Initial Value of Timer
+            TMR1L = 0;                //Setting Initial Value of Timer            
             TMR1ON = 1; //Start Timer
-        if (ULTRASONIC_ECHO == 0) //If ECHO is LOW
+        if (ULTRASONIC_ECHO == 0)     //If ECHO is LOW
         {
             TMR1ON = 0; //Stop Timer
-            distance = (TMR1L | (TMR1H << 8)) / 58; //Calculate Distance
+            distance = (TMR1L | (TMR1H << 8)) / 58; //Calculate Distance in cm
         }
     }
     GPIF = 0; //Clear GP On-Change Interrupt flag

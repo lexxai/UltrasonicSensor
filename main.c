@@ -22,11 +22,12 @@
 /* User Global Variable Declaration                                           */
 /******************************************************************************/
 
-volatile int distance;
-unsigned char countActionPresent;
-unsigned char countActionEmpty;
-unsigned char countActionDoor;
-unsigned int TimerStateOn;
+volatile uint16_t distance;
+uint8_t countActionPresent;
+uint8_t countActionEmpty;
+uint8_t countActionDoor;
+uint16_t TimerStateOn;
+//bool    doorStateChanged = false;
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -41,7 +42,7 @@ unsigned int TimerStateOn;
 #define ECHO_WAIT_PER_SEC       1000/ECHO_WAIT       //loops per second
 
 #define MAX_COUNT_TRY_PRESENT   ECHO_WAIT_PER_SEC*1  //seconds
-#define MAX_COUNT_TRY_EMPTY     ECHO_WAIT_PER_SEC*3  //seconds
+#define MAX_COUNT_TRY_EMPTY     ECHO_WAIT_PER_SEC*5  //seconds
 #define MAX_COUNT_TRY_DOOR      ECHO_WAIT_PER_SEC*1  //seconds
 
 #define MINUTES                 60                    //seconds
@@ -75,12 +76,14 @@ void main(void) {
         }
 
         distance=0;                    //reset distance
+        // checking door sensor
         if (countActionDoor >= MAX_COUNT_TRY_DOOR) {
-            //door opened will skip measure distance
+            //if door opened, will skip measure distance
             countActionPresent = MAX_COUNT_TRY_PRESENT;
             countActionEmpty = 0;
             countActionDoor = MAX_COUNT_TRY_DOOR;
         } else {
+            // if door opened 
             // start measure disance 
             ULTRASONIC_TRIGGER = 1;         //TRIGGER HIGH
             LATGPIO_FLUSH;
@@ -91,18 +94,21 @@ void main(void) {
             // end measuring disance 
         }
         
-        if (distance >= DISTANCE_LIMIT_LOW && distance <= DISTANCE_LIMIT_HIGH) //Check whether the result is valid or not
-        {
-            if (distance <= DISTANCE_SET) {
-                countActionPresent++;
-                countActionEmpty = 0;                
-            } else {
-                countActionEmpty++;
-                countActionPresent = 0;                
-            }
+        if (distance >= DISTANCE_LIMIT_LOW && distance <= DISTANCE_LIMIT_HIGH  \
+                && distance <= DISTANCE_SET) {
+            // Check when the result is valid from ultrasonic sensor 
+            // and if distance low than value (DISTANCE_SET)
+            // can say that now object Present Action
+            countActionPresent++;
+            countActionEmpty = 0;
+        } else {
+            //if ultrasonic sensor not answer good value or distance more than
+            //(DISTANCE_SET) can say that now object Empty Action
+            countActionEmpty++;
+            countActionPresent = 0;
         }
 
-      
+        //count Actions try for simulate tiomeout of Actions
         if (countActionPresent >= MAX_COUNT_TRY_PRESENT) {
             RELAY = 1; //RELAY ON 
             countActionPresent = 0;
@@ -114,18 +120,22 @@ void main(void) {
         }
 
         //checking safety MAX time of State ON
+        //when safety timer timeout then sitch off relay in any case
         if ((TimerStateOn >= MAX_TIME_ON)) {
+            //general safetimeout
             RELAY = 0; //RELAY OFF
             TimerStateOn = MAX_TIME_ON;
         } else if ((TimerStateOn >= MAX_DOOR_TIME_ON) && (countActionDoor >= MAX_COUNT_TRY_DOOR)) {
+            //door safetimeout
             RELAY = 0; //RELAY OFF
             TimerStateOn = MAX_DOOR_TIME_ON;
         } else if (RELAY) {
+            //tick for Timer of StateOn
             TimerStateOn++;
         } else {
             TimerStateOn = 0;
         }
         
-        LATGPIO_FLUSH;            
+        LATGPIO_FLUSH; // flush to real GPIO port by all 8 bits
     }
 }
