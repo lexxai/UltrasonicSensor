@@ -38,7 +38,7 @@ bool   UltraSonicPower=true;
 
 #define DISTANCE_LIMIT_LOW      2                    //cm
 #define DISTANCE_LIMIT_HIGH     400                  //cm
-#define DISTANCE_SET            15                   //cm
+#define DISTANCE_SET            145                  //cm
 
 #define ECHO_WAIT               125                  //ms
 #define ECHO_WAIT_PER_SEC       1000/ECHO_WAIT       //loops per second
@@ -80,7 +80,7 @@ void main(void) {
         }
         
         //check door sensor
-        if (DOOR_SENSOR) {
+        if (!DOOR_SENSOR) {
             countActionDoor++;
         } else {
             countActionDoor = 0;
@@ -134,7 +134,7 @@ void main(void) {
             TimerStateOn = 0;
         }
         
-        if (RELAY = 0) {
+        if (RELAY == 0) {
             TimerStateOff++;
             if (TimerStateOff >= TIME_OFF_DELAY) {
                 UltraSonicPower = false;

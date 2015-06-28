@@ -39,6 +39,13 @@ void InitApp(void) {
 
 
     /* Initialize peripherals */
+    
+   //WEAK PULL-UP for door sensor
+    WPU = 0;               //Pull-up disable for all ports
+    DOOR_SENSOR_WPU = 1;   //Pull-up enabled for door sensor port (reed switch)
+    OPTION_REGbits.nGPPU = 0; // enable individual pull-ups
+
+    
     /* Initialize TIMER 1 */
     
     T1CONbits.TMR1GE = 0; // disable timer1 gate.

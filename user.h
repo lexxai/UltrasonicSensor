@@ -24,6 +24,7 @@ volatile union {
 #define DOOR_SENSOR                     GP4
 #define DOOR_SENSOR_BIT                 GP4_bit
 #define DOOR_SENSOR_TRISBIT             TRISIObits.TRISIO4
+#define DOOR_SENSOR_WPU                 WPU4
 
 #define RELAY                           LATGPIO.bits.GP1
 #define RELAY_BIT                       GP1_bit
