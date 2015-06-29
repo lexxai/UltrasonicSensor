@@ -25,11 +25,17 @@
 volatile uint16_t distance;
 uint8_t countActionPresent;
 uint8_t countActionEmpty;
-uint8_t countActionDoor;
+int8_t countActionDoor;
 uint16_t TimerStateOn;
-uint16_t TimerStateOff;
-//bool    doorStateChanged = false;
-bool   UltraSonicPower=true;
+uint8_t TimerStateOff;
+bool DoorOpened = false;
+
+//enum  {UltraSonicUndefined, UltraSonicON, UltraSonicOFF};
+
+bool UltraSonicPower = true; //1-on,2-off
+bool SafeOffRelay = false; // true if was relay off by safe timer
+
+
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -40,19 +46,18 @@ bool   UltraSonicPower=true;
 #define DISTANCE_LIMIT_HIGH     400                  //cm
 #define DISTANCE_SET            145                  //cm
 
+#define TRIGGER_WAIT            10                   //ns
 #define ECHO_WAIT               125                  //ms
 #define ECHO_WAIT_PER_SEC       1000/ECHO_WAIT       //loops per second
 
 #define MAX_COUNT_TRY_PRESENT   ECHO_WAIT_PER_SEC*1  //seconds
 #define MAX_COUNT_TRY_EMPTY     ECHO_WAIT_PER_SEC*5  //seconds
-#define MAX_COUNT_TRY_DOOR      ECHO_WAIT_PER_SEC*1  //seconds
+#define MAX_COUNT_TRY_DOOR      ECHO_WAIT_PER_SEC/2  //seconds
 
 #define MINUTES                 60                    //seconds
-#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*15 //minutes
-#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*60 //minutes
-#define TIME_OFF_DELAY          ECHO_WAIT_PER_SEC*MINUTES/2 //minutes
-
-
+#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*2 //minutes (7200)  u16bit
+#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*3 //minutes (28800) u16bit
+#define USonicPower_OFF_DELAY   ECHO_WAIT_PER_SEC*MINUTES/2 //minutes  (240)   u8bit
 
 void main(void) {
     /* Configure the oscillator for the device */
@@ -66,64 +71,74 @@ void main(void) {
     countActionDoor = 0;
 
     ULTRASONIC_TRIGGER = 0; // START POS TRIGGER LOW
-    RELAY = 1;              // RELAY ON WHEH POWER ON;
+    RELAY = 1; // RELAY ON WHEH POWER ON;
     LATGPIO_FLUSH;
 
     while (1) {
         CLRWDT();
-        
-        if (UltraSonicPower) {
-            // power on of ultrasonic module
-            ULTRASONIC_POWER = true;
+
+        if (ULTRASONIC_POWER == !UltraSonicPower) { // only change state
+            ULTRASONIC_POWER = UltraSonicPower;
             LATGPIO_FLUSH;
             __delay_us(10); //10uS Delay for start module
         }
-        
-        //check door sensor
-        if (!DOOR_SENSOR) {
+
+        //check door sensor , opened = 1 , closed = 0
+        if (DOOR_SENSOR) {
             countActionDoor++;
         } else {
-            countActionDoor = 0;
+            countActionDoor--;
         }
 
-        distance=0;                    //reset distance
-       
+        distance = 0; //reset distance
+
         // checking door sensor
         if (countActionDoor >= MAX_COUNT_TRY_DOOR) {
             //if door opened, will skip measure distance
             countActionPresent = MAX_COUNT_TRY_PRESENT;
             countActionEmpty = 0;
             countActionDoor = MAX_COUNT_TRY_DOOR;
-            __delay_ms(ECHO_WAIT);          // SIMULTATE WAIT ECHO
-            UltraSonicPower=true;
-        } else {
-            // if door opened 
+            if (DoorOpened == false) { // detect change state
+                DoorOpened = true;
+                UltraSonicPower = true;
+            }
+            __delay_us(TRIGGER_WAIT*10); //10uS x10 Delay 
+            __delay_ms(ECHO_WAIT); // SIMULTATE WAIT ECHO
+        } else if (countActionDoor <= -MAX_COUNT_TRY_DOOR) {
+            // if door closed 
+            countActionDoor = -MAX_COUNT_TRY_DOOR;
             // start measure disance 
-            ULTRASONIC_TRIGGER = 1;         //TRIGGER HIGH
-            LATGPIO_FLUSH;
-            __delay_us(10);                 //10uS Delay 
-            ULTRASONIC_TRIGGER = 0;         //TRIGGER LOW
-            LATGPIO_FLUSH;
-            __delay_ms(ECHO_WAIT);          // WAIT ECHO
-            // end measuring disance 
-        }
-        
-        if (distance >= DISTANCE_LIMIT_LOW && distance <= DISTANCE_LIMIT_HIGH  \
-                && distance <= DISTANCE_SET) {
-            // Check when the result is valid from ultrasonic sensor 
-            // and if distance low than value (DISTANCE_SET)
-            // can say that now object Present Action
-            countActionPresent++;
-            countActionEmpty = 0;
-        } else {
-            //if ultrasonic sensor not answer good value or distance more than
-            //(DISTANCE_SET) can say that now object Empty Action
-            countActionEmpty++;
-            countActionPresent = 0;
-        }
+            if (DoorOpened == true) { // detect change state
+                DoorOpened = false;
+                SafeOffRelay = false;
+                UltraSonicPower = true;
+            }
 
+            ULTRASONIC_TRIGGER = 1; //TRIGGER HIGH
+            LATGPIO_FLUSH;
+            __delay_us(TRIGGER_WAIT); //10uS Delay 
+            ULTRASONIC_TRIGGER = 0; //TRIGGER LOW
+            LATGPIO_FLUSH;
+            __delay_ms(ECHO_WAIT); // WAIT ECHO
+            // end measuring disance 
+
+            // here must be result from interrupt with distance set, after delay ECHO_WAIT
+            if (distance >= DISTANCE_LIMIT_LOW && distance <= DISTANCE_LIMIT_HIGH  \
+                && distance <= DISTANCE_SET) {
+                // Check when the result is valid from ultrasonic sensor 
+                // and if distance low than value (DISTANCE_SET)
+                // can say that now object Present Action
+                countActionPresent++;
+                countActionEmpty = 0;
+            } else {
+                //if ultrasonic sensor not answer good value or distance more than
+                //(DISTANCE_SET) can say that now object Empty Action
+                countActionEmpty++;
+                countActionPresent = 0;
+            }
+        }
         //count Actions try for simulate tiomeout of Actions
-        if (countActionPresent >= MAX_COUNT_TRY_PRESENT) {
+        if ((countActionPresent >= MAX_COUNT_TRY_PRESENT) && !SafeOffRelay) {
             RELAY = 1; //RELAY ON 
             countActionPresent = 0;
             TimerStateOff = 0;
@@ -133,32 +148,35 @@ void main(void) {
             countActionEmpty = 0;
             TimerStateOn = 0;
         }
-        
-        if (RELAY == 0) {
-            TimerStateOff++;
-            if (TimerStateOff >= TIME_OFF_DELAY) {
-                UltraSonicPower = false;
-                TimerStateOff = TIME_OFF_DELAY;
-            }
-        }
+
+
 
         //checking safety MAX time of State ON
         //when safety timer timeout then sitch off relay in any case
         if ((TimerStateOn >= MAX_TIME_ON)) {
-            //general safetimeout
+            //general safe timeout
             RELAY = 0; //RELAY OFF
             TimerStateOn = MAX_TIME_ON;
-        } else if ((TimerStateOn >= MAX_DOOR_TIME_ON) && (countActionDoor >= MAX_COUNT_TRY_DOOR)) {
-            //door safetimeout
-            RELAY = 0; //RELAY OFF
-            TimerStateOn = MAX_DOOR_TIME_ON;
-        } else if (RELAY) {
+            SafeOffRelay = true;
+        } else if (TimerStateOn >= MAX_DOOR_TIME_ON) {
+            if (countActionDoor >= MAX_COUNT_TRY_DOOR) {
+                //if door opened is then safe timeout                
+                RELAY = 0; //RELAY OFF   
+                SafeOffRelay = true;
+            }
+        }
+        if (RELAY) {
             //tick for Timer of StateOn
             TimerStateOn++;
         } else {
             TimerStateOn = 0;
+            TimerStateOff++;
+            if (TimerStateOff >= USonicPower_OFF_DELAY) {
+                UltraSonicPower = false;
+                TimerStateOff = USonicPower_OFF_DELAY;
+            }
         }
-        
+
         LATGPIO_FLUSH; // flush to real GPIO port by all 8 bits
     }
 }
