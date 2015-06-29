@@ -858,9 +858,9 @@ extern void _delay(unsigned long);
 
 # 36 "configuration_bits.c"
 #pragma config FOSC = INTRCIO
-#pragma config WDTE = OFF
-#pragma config PWRTE = OFF
+#pragma config WDTE = ON
+#pragma config PWRTE = ON
 #pragma config MCLRE = OFF
-#pragma config BOREN = OFF
+#pragma config BOREN = ON
 #pragma config CP = OFF
 #pragma config CPD = OFF
