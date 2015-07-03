@@ -55,9 +55,12 @@ bool SafeOffRelay = false; // true if was relay off by safe timer
 #define MAX_COUNT_TRY_DOOR      ECHO_WAIT_PER_SEC/2  //seconds
 
 #define MINUTES                 60                    //seconds
-#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*2 //minutes (7200)  u16bit
-#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*3 //minutes (28800) u16bit
+#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*15 //minutes (7200)  u16bit
+#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*60 //minutes (28800) u16bit
 #define USonicPower_OFF_DELAY   ECHO_WAIT_PER_SEC*MINUTES/2 //minutes  (240)   u8bit
+
+#define USonicPower_on          false
+#define USonicPower_off         !USonicPower_on
 
 void main(void) {
     /* Configure the oscillator for the device */
@@ -72,7 +75,9 @@ void main(void) {
 
     ULTRASONIC_TRIGGER = 0; // START POS TRIGGER LOW
     RELAY = 1; // RELAY ON WHEH POWER ON;
+    ULTRASONIC_POWER = USonicPower_off;
     LATGPIO_FLUSH;
+    UltraSonicPower = USonicPower_on;
 
     while (1) {
         CLRWDT();
@@ -100,7 +105,7 @@ void main(void) {
             countActionDoor = MAX_COUNT_TRY_DOOR;
             if (DoorOpened == false) { // detect change state
                 DoorOpened = true;
-                UltraSonicPower = true;
+                UltraSonicPower = USonicPower_on;
             }
             __delay_us(TRIGGER_WAIT*10); //10uS x10 Delay 
             __delay_ms(ECHO_WAIT); // SIMULTATE WAIT ECHO
@@ -111,7 +116,7 @@ void main(void) {
             if (DoorOpened == true) { // detect change state
                 DoorOpened = false;
                 SafeOffRelay = false;
-                UltraSonicPower = true;
+                UltraSonicPower = USonicPower_on;
             }
 
             ULTRASONIC_TRIGGER = 1; //TRIGGER HIGH
@@ -172,7 +177,7 @@ void main(void) {
             TimerStateOn = 0;
             TimerStateOff++;
             if (TimerStateOff >= USonicPower_OFF_DELAY) {
-                UltraSonicPower = false;
+                UltraSonicPower = USonicPower_off;
                 TimerStateOff = USonicPower_OFF_DELAY;
             }
         }
