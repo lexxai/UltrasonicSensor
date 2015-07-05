@@ -44,7 +44,7 @@ bool SafeOffRelay = false; // true if was relay off by safe timer
 
 #define DISTANCE_LIMIT_LOW      2                    //cm
 #define DISTANCE_LIMIT_HIGH     400                  //cm
-#define DISTANCE_SET            145                  //cm
+#define DISTANCE_SET            158                  //cm
 
 #define TRIGGER_WAIT            10                   //ns
 #define ECHO_WAIT               125                  //ms
@@ -74,7 +74,7 @@ void main(void) {
     countActionDoor = 0;
 
     ULTRASONIC_TRIGGER = 0; // START POS TRIGGER LOW
-    RELAY = 1; // RELAY ON WHEH POWER ON;
+    RELAY = 0; // RELAY OFF WHEH POWER ON;
     ULTRASONIC_POWER = USonicPower_off;
     LATGPIO_FLUSH;
     UltraSonicPower = USonicPower_on;
