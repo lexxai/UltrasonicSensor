@@ -44,7 +44,7 @@ bool SafeOffRelay = false; // true if was relay off by safe timer
 
 #define DISTANCE_LIMIT_LOW      2                    //cm
 #define DISTANCE_LIMIT_HIGH     400                  //cm
-#define DISTANCE_SET            158                  //cm
+#define DISTANCE_SET            145                  //cm
 
 #define TRIGGER_WAIT            10                   //ns
 #define ECHO_WAIT               125                  //ms
@@ -82,11 +82,17 @@ void main(void) {
     while (1) {
         CLRWDT();
 
+        #ifndef DEBUG_UART
         if (ULTRASONIC_POWER == !UltraSonicPower) { // only change state
             ULTRASONIC_POWER = UltraSonicPower;
+        #else
+            ULTRASONIC_POWER = USonicPower_on;
+        #endif                
             LATGPIO_FLUSH;
-            __delay_us(10); //10uS Delay for start module
+            __delay_us(20); //10uS Delay for start module
+        #ifndef DEBUG_UART    
         }
+        #endif 
 
         //check door sensor , opened = 1 , closed = 0
         if (DOOR_SENSOR) {
@@ -181,7 +187,16 @@ void main(void) {
                 TimerStateOff = USonicPower_OFF_DELAY;
             }
         }
-
         LATGPIO_FLUSH; // flush to real GPIO port by all 8 bits
+        #ifdef DEBUG_UART
+        init_serial();
+        __delay_us(200); //10uS Delay 
+        #endif
+        #ifdef DEBUG_UART
+        //distance = 135;
+        send_serial_byte(distance>>8);
+        send_serial_byte(distance);
+        #endif
     }
 }
+

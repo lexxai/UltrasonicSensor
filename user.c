@@ -11,7 +11,9 @@
 #include <stdint.h>         /* For uint8_t definition */
 #include <stdbool.h>        /* For true/false definition */
 
+#include "system.h"
 #include "user.h"
+
 
 
 
@@ -36,7 +38,10 @@ void InitApp(void) {
     RELAY_TRISBIT = 0; //OUT
     
     ULTRASONIC_POWER_TRISBIT  = 0; //OUT  
-
+    #ifdef DEBUG_UART
+    UART_OUT_TRISBIT  = 0; //OUT
+    #endif
+    
 
     /* Initialize peripherals */
     
@@ -57,12 +62,87 @@ void InitApp(void) {
     /* Initialize TIMER 0 PRESCASLER FOR WATCHDOG */ 
     OPTION_REGbits.PSA =  1;       // Use internal Watchdog timer ~18ms
     OPTION_REGbits.PS  =  0b101;   // WDT rate 1:32, ~576ms
+    
+    #ifdef DEBUG_UART
+    //Timer 0
+    OPTION_REGbits.PSA =  1; // Use TMR0 counting FOSC/4
+    OPTION_REGbits.T0CS = 0; // Select TMR0 in Timer Mode (counting FOSC/4)
+    #endif
 
     /* Enable interrupts */
     GPIF = 0; //Clear GPIO On-Change Interrupt Flag
     IOC = ULTRASONIC_ECHO_MASK; //Enable On-Change Interrupt GPIO for ULTRASONIC_ECHO 
     GPIE = 1; //Enable GPIO On-Change Interrupt
     GIE = 1; //Global Interrupt Enable
-
+    
+    #ifdef DEBUG_UART
+    init_serial();
+    #endif
 }
 
+#ifdef DEBUG_UART
+void init_serial() {
+    UART_OUT = SER_BIT; // make hi level
+    LATGPIO_FLUSH;
+}
+
+void send_serial_byte(unsigned char data) {
+    unsigned char i;
+    i = 8; // 8 data bits to send
+
+    //PortBShadow &= (!SER_BIT)<<TxPin
+    //PORTB = PortBShadow;
+    UART_OUT = !SER_BIT; // make start bit
+    LATGPIO_FLUSH;
+    TMR0 = (256 - SER_BAUD - 5); // load TMR0 value for first baud;
+    while (TMR0 & (1 << 7)); // wait for baud
+
+    while (i) // send 8 serial bits, LSB first
+    {
+        if (data & 1 << 0) UART_OUT = SER_BIT; // send data bit
+        else UART_OUT = !SER_BIT;
+        LATGPIO_FLUSH;
+        data = (data >> 1); // rotate right to get next bit
+        i--;
+        TMR0 -= SER_BAUD; // load corrected baud value
+        while (TMR0 & 1 << 7); // wait for baud
+    }
+    UART_OUT = SER_BIT; // make stop bit
+    LATGPIO_FLUSH;
+    TMR0 -= SER_BAUD; // wait a couple of baud for safety
+    while (TMR0 & 1 << 7);
+    TMR0 -= SER_BAUD; // wait a couple of baud for safety
+    while (TMR0 & 1 << 7);
+}
+void send_serial_byte2(unsigned char data) {
+    di();
+    unsigned char i;
+    i = 8; // 8 data bits to send
+
+    //PortBShadow &= (!SER_BIT)<<TxPin
+    //PORTB = PortBShadow;
+    UART_OUT = !SER_BIT; // make start bit
+    LATGPIO_FLUSH;
+#define HALF_BIT_DELAY 44
+#define BIT_DELAY 91
+    _delay(BIT_DELAY);
+    //while (TMR0 & (1 << 7)); // wait for baud
+
+    while (i) // send 8 serial bits, LSB first
+    {
+        if (data & 1 << 0) UART_OUT = SER_BIT; // send data bit
+        else UART_OUT = !SER_BIT;
+        data = (data >> 1); // rotate right to get next bit
+        i--;
+        //TMR0 -= SER_BAUD; // load corrected baud value
+        //while (TMR0 & 1 << 7); // wait for baud
+        LATGPIO_FLUSH;        
+        _delay(BIT_DELAY);
+    }
+    UART_OUT = SER_BIT; // make stop bit
+    LATGPIO_FLUSH;
+    _delay(BIT_DELAY);
+    ei();
+}
+
+#endif
