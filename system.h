@@ -9,7 +9,7 @@
 #define FCY             SYS_FREQ/4
 #define _XTAL_FREQ      SYS_FREQ
 
-#define DEBUG_UART 
+//#define DEBUG_UART 
 #ifdef DEBUG_UART
 #define BAUDRATE    9600        // Desierd BAUD Rate (tested) Rates 9600 and 19200
 #define SER_BAUD    (((_XTAL_FREQ / 4) / BAUDRATE) - 3) //3

@@ -43,8 +43,8 @@ bool SafeOffRelay = false; // true if was relay off by safe timer
 /******************************************************************************/
 
 #define DISTANCE_LIMIT_LOW      2                    //cm
-#define DISTANCE_LIMIT_HIGH     400                  //cm
-#define DISTANCE_SET            145                  //cm
+#define DISTANCE_LIMIT_HIGH     300                  //cm
+#define DISTANCE_SET            60                  //cm
 
 #define TRIGGER_WAIT            10                   //ns
 #define ECHO_WAIT               125                  //ms
@@ -190,10 +190,10 @@ void main(void) {
         LATGPIO_FLUSH; // flush to real GPIO port by all 8 bits
         #ifdef DEBUG_UART
         init_serial();
-        __delay_us(200); //10uS Delay 
+        __delay_us(200); //200uS Delay 
         #endif
         #ifdef DEBUG_UART
-        //distance = 135;
+        //send uint16_t format to serial, use RealTerm app for diaplay it
         send_serial_byte(distance>>8);
         send_serial_byte(distance);
         #endif
