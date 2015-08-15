@@ -42,16 +42,30 @@ bool SafeOffRelay = false; // true if was relay off by safe timer
 
 /******************************************************************************/
 
-#define DISTANCE_LIMIT_LOW      2                    //cm
-#define DISTANCE_LIMIT_HIGH     300                  //cm
-#define DISTANCE_SET            60                  //cm
+#define DISTANCE_LIMIT_LOW      2   //cm. Object present after this distance
+                                    //    Object not present before this distance
+#define DISTANCE_LIMIT_HIGH     100 //cm  Object present after this distance
+                                    //    Object not present before this distance
+#define DISTANCE_SET            60  //cm. Object present before this distance
+                                    //    Object not present after this distance
+// In General:
+// Object not present {0...DISTANCE_LIMIT_LOW} || {DISTANCE_SET...DISTANCE_LIMIT_HIGH} 
+// Object present {DISTANCE_LIMIT_LOW...DISTANCE_SET} || {DISTANCE_LIMIT_HIGH...INFINITY}
+// This {DISTANCE_LIMIT_HIGH...INFINITY} condition was added after testing, since human body 
+// is not good reflective. In some case sound reflect from human body into space
+// and not back to sensor.
+
+// Precision measure:
+// for 4MHz chip clock, timer use /4 = 1MHz. 
+// With this frequency distance precision is 4 cm.
+
 
 #define TRIGGER_WAIT            10                   //ns
 #define ECHO_WAIT               125                  //ms
 #define ECHO_WAIT_PER_SEC       1000/ECHO_WAIT       //loops per second
 
 #define MAX_COUNT_TRY_PRESENT   ECHO_WAIT_PER_SEC*1  //seconds
-#define MAX_COUNT_TRY_EMPTY     ECHO_WAIT_PER_SEC*5  //seconds
+#define MAX_COUNT_TRY_EMPTY     ECHO_WAIT_PER_SEC*15 //seconds
 #define MAX_COUNT_TRY_DOOR      ECHO_WAIT_PER_SEC/2  //seconds
 
 #define MINUTES                 60                    //seconds
@@ -134,8 +148,7 @@ void main(void) {
             // end measuring disance 
 
             // here must be result from interrupt with distance set, after delay ECHO_WAIT
-            if (distance >= DISTANCE_LIMIT_LOW && distance <= DISTANCE_LIMIT_HIGH  \
-                && distance <= DISTANCE_SET) {
+            if (distance >= DISTANCE_LIMIT_LOW && (distance <= DISTANCE_SET || distance >= DISTANCE_LIMIT_HIGH)) {
                 // Check when the result is valid from ultrasonic sensor 
                 // and if distance low than value (DISTANCE_SET)
                 // can say that now object Present Action
@@ -191,8 +204,6 @@ void main(void) {
         #ifdef DEBUG_UART
         init_serial();
         __delay_us(200); //200uS Delay 
-        #endif
-        #ifdef DEBUG_UART
         //send uint16_t format to serial, use RealTerm app for diaplay it
         send_serial_byte(distance>>8);
         send_serial_byte(distance);
