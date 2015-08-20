@@ -27,7 +27,7 @@
 
 void InitApp(void) {
     /* TODO Initialize User Ports/Peripherals/Project here */
-    
+
     /* Setup analog functionality and port direction */
     ANSEL = 0; //Digital IN
 
@@ -36,51 +36,52 @@ void InitApp(void) {
 
     DOOR_SENSOR_TRISBIT = 1; //IN
     RELAY_TRISBIT = 0; //OUT
-    
-    ULTRASONIC_POWER_TRISBIT  = 0; //OUT  
-    #ifdef DEBUG_UART
-    UART_OUT_TRISBIT  = 0; //OUT
-    #endif
-    
+
+    ULTRASONIC_POWER_TRISBIT = 0; //OUT  
+#ifdef DEBUG_UART
+    UART_OUT_TRISBIT = 0; //OUT
+#endif
+
 
     /* Initialize peripherals */
-    
-   //WEAK PULL-UP for door sensor
-    WPU = 0;               //Pull-up disable for all ports
-    DOOR_SENSOR_WPU = 1;   //Pull-up enabled for door sensor port (reed switch)
+
+    //WEAK PULL-UP for door sensor
+    WPU = 0; //Pull-up disable for all ports
+    DOOR_SENSOR_WPU = 1; //Pull-up enabled for door sensor port (reed switch)
     OPTION_REGbits.nGPPU = 0; // enable individual pull-ups
 
-    
+
     /* Initialize TIMER 1 */
-    
+
     T1CONbits.TMR1GE = 0; // disable timer1 gate.
     T1CONbits.TMR1CS = 0; // internal clock Fosc/4. Fosc/4= 4MHz/4 = 1Mhz
     T1CONbits.T1CKPS = 0x00; // prescaler timer1 1:1. 1:1 = 1Mhz
     T1CONbits.T1OSCEN = 0; // disable LP.
     T1CONbits.TMR1ON = 0; // disable timer1.
-    
-    /* Initialize TIMER 0 PRESCASLER FOR WATCHDOG */ 
-    OPTION_REGbits.PSA =  1;       // Use internal Watchdog timer ~18ms
-    OPTION_REGbits.PS  =  WATCHDOG_PRESCALER_MAIN;   
-    
-    #ifdef DEBUG_UART
+
+    /* Initialize TIMER 0 PRESCASLER FOR WATCHDOG */
+    OPTION_REGbits.PSA = 1; // Use internal Watchdog timer ~18ms
+    OPTION_REGbits.PS = WATCHDOG_PRESCALER_MAIN;
+
+#ifdef DEBUG_UART
     //Timer 0
-    OPTION_REGbits.PSA =  1; // Use TMR0 counting FOSC/4
+    OPTION_REGbits.PSA = 1; // Use TMR0 counting FOSC/4
     OPTION_REGbits.T0CS = 0; // Select TMR0 in Timer Mode (counting FOSC/4)
-    #endif
+#endif
 
     /* Enable interrupts */
     GPIF = 0; //Clear GPIO On-Change Interrupt Flag
     IOC = ULTRASONIC_ECHO_MASK; //Enable On-Change Interrupt GPIO for ULTRASONIC_ECHO 
     GPIE = 1; //Enable GPIO On-Change Interrupt
     GIE = 1; //Global Interrupt Enable
-    
-    #ifdef DEBUG_UART
+
+#ifdef DEBUG_UART
     init_serial();
-    #endif
+#endif
 }
 
 #ifdef DEBUG_UART
+
 void init_serial() {
     UART_OUT = SER_BIT; // make hi level
     LATGPIO_FLUSH;
@@ -114,6 +115,7 @@ void send_serial_byte(unsigned char data) {
     TMR0 -= SER_BAUD; // wait a couple of baud for safety
     while (TMR0 & 1 << 7);
 }
+
 void send_serial_byte2(unsigned char data) {
     di();
     unsigned char i;
@@ -136,7 +138,7 @@ void send_serial_byte2(unsigned char data) {
         i--;
         //TMR0 -= SER_BAUD; // load corrected baud value
         //while (TMR0 & 1 << 7); // wait for baud
-        LATGPIO_FLUSH;        
+        LATGPIO_FLUSH;
         _delay(BIT_DELAY);
     }
     UART_OUT = SER_BIT; // make stop bit
@@ -146,3 +148,17 @@ void send_serial_byte2(unsigned char data) {
 }
 
 #endif
+
+void WDT_SLEEP(void) {
+    //SLEEP THAT SIMULATE APPROXIMATLY WAIT ECHO ,WDT RC ~144ms, WAIT ECHO 142ms
+    GIE = 0; //Global Interrupt DISABLE
+    CLRWDT();
+    //tune watchdog time to sleep time approx. equal one loop delay
+    OPTION_REGbits.PS = WATCHDOG_PRESCALER_SLEEP; //~144ms 
+    SLEEP(); // Included CLRWDT. WAKEUP BY WATCHDOG TIMEOUT  
+    NOP();
+    //now recover general watchdog time
+    OPTION_REGbits.PS = WATCHDOG_PRESCALER_MAIN; //~576ms 
+    CLRWDT();
+    GIE = 1; //Global Interrupt Enable
+}

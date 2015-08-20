@@ -127,18 +127,8 @@ void main(void) {
                 DoorOpened = true;
                 UltraSonicPower = USonicPower_on;
             }
-            //TODO. HERE CAN BE SLEEP TOO
-            GIE = 0; //Global Interrupt DISABLE
-            CLRWDT();
-            //tune watchdog time to sleep time approx. equal one loop delay
-            OPTION_REGbits.PS = WATCHDOG_PRESCALER_SLEEP; //~144ms 
-            SLEEP(); // Included CLRWDT. WAKEUP BY WATCHDOG TIMEOUT  
-            NOP();
-            //now recover general watchdog time
-            OPTION_REGbits.PS = WATCHDOG_PRESCALER_MAIN; //~576ms 
-            CLRWDT();
-            GIE = 1; //Global Interrupt Enable
 
+            WDT_SLEEP();
 
         } else if (countActionDoor <= -MAX_COUNT_TRY_DOOR) {
             // if door closed 
@@ -158,17 +148,7 @@ void main(void) {
                 LATGPIO_FLUSH;
                 __delay_ms(ECHO_WAIT); // WAIT ECHO
             } else {
-                //TODO HERE MUST BE SLEEP WHILE WAIT ECHO 
-                GIE = 0; //Global Interrupt DISABLE
-                CLRWDT();
-                //tune watchdog time to sleep time approx. equal one loop delay
-                OPTION_REGbits.PS = WATCHDOG_PRESCALER_SLEEP; //~144ms 
-                SLEEP(); // Included CLRWDT. WAKEUP BY WATCHDOG TIMEOUT  
-                NOP();
-                //now recover general watchdog time
-                OPTION_REGbits.PS = WATCHDOG_PRESCALER_MAIN; //~576ms 
-                CLRWDT();
-                GIE = 1; //Global Interrupt Enable
+                WDT_SLEEP();
             }
             // end measuring distance 
 

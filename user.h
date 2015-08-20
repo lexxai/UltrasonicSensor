@@ -54,3 +54,5 @@ void init_serial();
 void send_serial_byte(unsigned char data);
 void send_serial_byte2(unsigned char data);
 #endif
+
+void WDT_SLEEP(void);
