@@ -43,11 +43,11 @@ bool SafeOffRelay = false; // true if was relay off by safe timer
 /******************************************************************************/
 
 #define DISTANCE_LIMIT_LOW      2   //cm. Object present after this distance
-                                    //    Object not present before this distance
+//    Object not present before this distance
 #define DISTANCE_LIMIT_HIGH     100 //cm  Object present after this distance
-                                    //    Object not present before this distance
+//    Object not present before this distance
 #define DISTANCE_SET            60  //cm. Object present before this distance
-                                    //    Object not present after this distance
+//    Object not present after this distance
 // In General:
 // Object not present {0...DISTANCE_LIMIT_LOW} || {DISTANCE_SET...DISTANCE_LIMIT_HIGH} 
 // Object present {DISTANCE_LIMIT_LOW...DISTANCE_SET} || {DISTANCE_LIMIT_HIGH...INFINITY}
@@ -61,7 +61,7 @@ bool SafeOffRelay = false; // true if was relay off by safe timer
 
 
 #define TRIGGER_WAIT            10                   //ns
-#define ECHO_WAIT               125                  //ms
+#define ECHO_WAIT               142                  //ms
 #define ECHO_WAIT_PER_SEC       1000/ECHO_WAIT       //loops per second
 
 #define MAX_COUNT_TRY_PRESENT   ECHO_WAIT_PER_SEC*1  //seconds
@@ -69,9 +69,9 @@ bool SafeOffRelay = false; // true if was relay off by safe timer
 #define MAX_COUNT_TRY_DOOR      ECHO_WAIT_PER_SEC/2  //seconds
 
 #define MINUTES                 60                    //seconds
-#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*15 //minutes (7200)  u16bit
-#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*60 //minutes (28800) u16bit
-#define USonicPower_OFF_DELAY   ECHO_WAIT_PER_SEC*MINUTES/2 //minutes  (240)   u8bit
+#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*15 //minutes (6300)  u16bit
+#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*60 //minutes (25200) u16bit
+#define USonicPower_OFF_DELAY   ECHO_WAIT_PER_SEC*MINUTES/2 //minutes  (210)   u8bit
 
 #define USonicPower_on          false
 #define USonicPower_off         !USonicPower_on
@@ -96,17 +96,17 @@ void main(void) {
     while (1) {
         CLRWDT();
 
-        #ifndef DEBUG_UART
+#ifndef DEBUG_UART
         if (ULTRASONIC_POWER == !UltraSonicPower) { // only change state
             ULTRASONIC_POWER = UltraSonicPower;
-        #else
-            ULTRASONIC_POWER = USonicPower_on;
-        #endif                
+#else
+        ULTRASONIC_POWER = USonicPower_on;
+#endif                
             LATGPIO_FLUSH;
             __delay_us(20); //10uS Delay for start module
-        #ifndef DEBUG_UART    
+#ifndef DEBUG_UART    
         }
-        #endif 
+#endif 
 
         //check door sensor , opened = 1 , closed = 0
         if (DOOR_SENSOR) {
@@ -128,10 +128,18 @@ void main(void) {
                 UltraSonicPower = USonicPower_on;
             }
             //TODO. HERE CAN BE SLEEP TOO
-            __delay_us(TRIGGER_WAIT*10); //10uS x10 Delay 
-            __delay_ms(ECHO_WAIT); // SIMULTATE WAIT ECHO
-            
-            
+            GIE = 0; //Global Interrupt DISABLE
+            CLRWDT();
+            //tune watchdog time to sleep time approx. equal one loop delay
+            OPTION_REGbits.PS = WATCHDOG_PRESCALER_SLEEP; //~144ms 
+            SLEEP(); // Included CLRWDT. WAKEUP BY WATCHDOG TIMEOUT  
+            NOP();
+            //now recover general watchdog time
+            OPTION_REGbits.PS = WATCHDOG_PRESCALER_MAIN; //~576ms 
+            CLRWDT();
+            GIE = 1; //Global Interrupt Enable
+
+
         } else if (countActionDoor <= -MAX_COUNT_TRY_DOOR) {
             // if door closed 
             countActionDoor = -MAX_COUNT_TRY_DOOR;
@@ -150,8 +158,17 @@ void main(void) {
                 LATGPIO_FLUSH;
                 __delay_ms(ECHO_WAIT); // WAIT ECHO
             } else {
-                //TODO HERE MUST BE SLEEP WHILE WAIT ECHO    
-                __delay_ms(ECHO_WAIT); // WAIT ECHO
+                //TODO HERE MUST BE SLEEP WHILE WAIT ECHO 
+                GIE = 0; //Global Interrupt DISABLE
+                CLRWDT();
+                //tune watchdog time to sleep time approx. equal one loop delay
+                OPTION_REGbits.PS = WATCHDOG_PRESCALER_SLEEP; //~144ms 
+                SLEEP(); // Included CLRWDT. WAKEUP BY WATCHDOG TIMEOUT  
+                NOP();
+                //now recover general watchdog time
+                OPTION_REGbits.PS = WATCHDOG_PRESCALER_MAIN; //~576ms 
+                CLRWDT();
+                GIE = 1; //Global Interrupt Enable
             }
             // end measuring distance 
 
@@ -209,13 +226,13 @@ void main(void) {
             }
         }
         LATGPIO_FLUSH; // flush to real GPIO port by all 8 bits
-        #ifdef DEBUG_UART
+#ifdef DEBUG_UART
         init_serial();
         __delay_us(200); //200uS Delay 
         //send uint16_t format to serial, use RealTerm app for display it
-        send_serial_byte(distance>>8);
+        send_serial_byte(distance >> 8);
         send_serial_byte(distance);
-        #endif
+#endif
     }
 }
 

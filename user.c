@@ -61,7 +61,7 @@ void InitApp(void) {
     
     /* Initialize TIMER 0 PRESCASLER FOR WATCHDOG */ 
     OPTION_REGbits.PSA =  1;       // Use internal Watchdog timer ~18ms
-    OPTION_REGbits.PS  =  0b101;   // WDT rate 1:32, ~576ms
+    OPTION_REGbits.PS  =  WATCHDOG_PRESCALER_MAIN;   
     
     #ifdef DEBUG_UART
     //Timer 0

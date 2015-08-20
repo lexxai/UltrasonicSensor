@@ -36,6 +36,11 @@ volatile union {
 #define UART_OUT_TRISBIT                TRISIObits.TRISIO0
 #endif
 
+
+// Used internal Watchdog timer ~18ms
+#define WATCHDOG_PRESCALER_MAIN  0b101  // WDT rate 1:32, ~576ms
+#define WATCHDOG_PRESCALER_SLEEP 0b011  // WDT rate 1:8,  ~144ms    
+
 /* TODO Application specific user parameters used in user.c may go here */
 
 /******************************************************************************/
