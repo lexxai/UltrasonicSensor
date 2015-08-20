@@ -127,25 +127,33 @@ void main(void) {
                 DoorOpened = true;
                 UltraSonicPower = USonicPower_on;
             }
+            //TODO. HERE CAN BE SLEEP TOO
             __delay_us(TRIGGER_WAIT*10); //10uS x10 Delay 
             __delay_ms(ECHO_WAIT); // SIMULTATE WAIT ECHO
+            
+            
         } else if (countActionDoor <= -MAX_COUNT_TRY_DOOR) {
             // if door closed 
             countActionDoor = -MAX_COUNT_TRY_DOOR;
-            // start measure disance 
+            // start measure distance 
             if (DoorOpened == true) { // detect change state
                 DoorOpened = false;
                 SafeOffRelay = false;
                 UltraSonicPower = USonicPower_on;
             }
 
-            ULTRASONIC_TRIGGER = 1; //TRIGGER HIGH
-            LATGPIO_FLUSH;
-            __delay_us(TRIGGER_WAIT); //10uS Delay 
-            ULTRASONIC_TRIGGER = 0; //TRIGGER LOW
-            LATGPIO_FLUSH;
-            __delay_ms(ECHO_WAIT); // WAIT ECHO
-            // end measuring disance 
+            if (UltraSonicPower) {
+                ULTRASONIC_TRIGGER = 1; //TRIGGER HIGH
+                LATGPIO_FLUSH;
+                __delay_us(TRIGGER_WAIT); //10uS Delay 
+                ULTRASONIC_TRIGGER = 0; //TRIGGER LOW
+                LATGPIO_FLUSH;
+                __delay_ms(ECHO_WAIT); // WAIT ECHO
+            } else {
+                //TODO HERE MUST BE SLEEP WHILE WAIT ECHO    
+                __delay_ms(ECHO_WAIT); // WAIT ECHO
+            }
+            // end measuring distance 
 
             // here must be result from interrupt with distance set, after delay ECHO_WAIT
             if (distance >= DISTANCE_LIMIT_LOW && (distance <= DISTANCE_SET || distance >= DISTANCE_LIMIT_HIGH)) {
@@ -161,7 +169,7 @@ void main(void) {
                 countActionPresent = 0;
             }
         }
-        //count Actions try for simulate tiomeout of Actions
+        //count Actions try for simulate timeout of Actions
         if ((countActionPresent >= MAX_COUNT_TRY_PRESENT) && !SafeOffRelay) {
             RELAY = 1; //RELAY ON 
             countActionPresent = 0;
@@ -176,7 +184,7 @@ void main(void) {
 
 
         //checking safety MAX time of State ON
-        //when safety timer timeout then sitch off relay in any case
+        //when safety timer timeout then switch off relay in any case
         if ((TimerStateOn >= MAX_TIME_ON)) {
             //general safe timeout
             RELAY = 0; //RELAY OFF
@@ -204,7 +212,7 @@ void main(void) {
         #ifdef DEBUG_UART
         init_serial();
         __delay_us(200); //200uS Delay 
-        //send uint16_t format to serial, use RealTerm app for diaplay it
+        //send uint16_t format to serial, use RealTerm app for display it
         send_serial_byte(distance>>8);
         send_serial_byte(distance);
         #endif
