@@ -173,14 +173,15 @@ void main(void) {
             RELAY = 1; //RELAY ON 
             countActionPresent = 0;
             TimerStateOff = 0;
+        } else if (countActionPresent >= MAX_COUNT_TRY_PRESENT) {
+            countActionPresent = 0; //for case when SafeOffRelay state is
         }
+
         if (countActionEmpty >= MAX_COUNT_TRY_EMPTY) {
             RELAY = 0; //RELAY OFF
             countActionEmpty = 0;
             TimerStateOn = 0;
         }
-
-
 
         //checking safety MAX time of State ON
         //when safety timer timeout then switch off relay in any case
