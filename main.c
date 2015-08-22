@@ -165,6 +165,8 @@ void main(void) {
                 countActionEmpty++;
                 countActionPresent = 0;
             }
+        } else {
+            WDT_SLEEP(); //delay for checking door state
         }
         //count Actions try for simulate timeout of Actions
         if ((countActionPresent >= MAX_COUNT_TRY_PRESENT) && !SafeOffRelay) {
