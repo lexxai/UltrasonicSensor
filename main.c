@@ -140,7 +140,7 @@ void main(void) {
                 UltraSonicPower = USonicPower_on;
             }
 
-            if (UltraSonicPower) {
+            if (UltraSonicPower == USonicPower_on) {
                 ULTRASONIC_TRIGGER = 1; //TRIGGER HIGH
                 LATGPIO_FLUSH;
                 __delay_us(TRIGGER_WAIT); //10uS Delay 
