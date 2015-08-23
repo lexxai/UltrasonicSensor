@@ -22,7 +22,7 @@
 
 #define DISTANCE_LIMIT_LOW      2   //cm. Object present after this distance
 //    Object not present before this distance
-#define DISTANCE_LIMIT_HIGH     100 //cm  Object present after this distance
+#define DISTANCE_LIMIT_HIGH     92 //cm  Object present after this distance
 //    Object not present before this distance
 #define DISTANCE_SET            60  //cm. Object present before this distance
 //    Object not present after this distance
@@ -57,7 +57,7 @@ void main(void) {
     LATGPIO_FLUSH;
     UltraSonicPower = USonicPower_on;
     checkUltraSonicPowerforApply();
-
+    
     while (1) {
         CLRWDT();
 

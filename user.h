@@ -59,7 +59,7 @@ volatile union {
 #define USonicPower_off         !USonicPower_on
 
 
-#define UseWatchDogForDelay      true
+#define UseWatchDogForDelay      1
 // Used internal Watchdog timer ~18ms
 #define WATCHDOG_PRESCALER_MAIN  0b101  // WDT rate 1:32, ~576ms
 #define WATCHDOG_PRESCALER_SLEEP 0b011  // WDT rate 1:8,  ~144ms    

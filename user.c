@@ -161,7 +161,7 @@ void checkUltraSonicPowerforApply(void) {
 #endif                
         LATGPIO_FLUSH;
         __delay_us(20); //10uS Delay for start module
-#ifndef DEBUG_UART    
+#ifndef DEBUG_UART     
     }
 #endif 
     return;
