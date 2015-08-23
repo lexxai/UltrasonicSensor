@@ -149,7 +149,23 @@ void send_serial_byte2(unsigned char data) {
 
 #endif
 
+void checkUltraSonicPowerforApply(void) {
+#ifndef DEBUG_UART
+    if (ULTRASONIC_POWER == !UltraSonicPower) { // only change state
+        ULTRASONIC_POWER = UltraSonicPower;
+#else
+    ULTRASONIC_POWER = USonicPower_on;
+#endif                
+        LATGPIO_FLUSH;
+        __delay_us(20); //10uS Delay for start module
+#ifndef DEBUG_UART    
+    }
+#endif 
+    return;
+}
+
 void WDT_SLEEP(void) {
+#if (UseWatchDogForDelay)
     //SLEEP THAT SIMULATE APPROXIMATLY WAIT ECHO ,WDT RC ~144ms, WAIT ECHO 142ms
     GIE = 0; //Global Interrupt DISABLE
     CLRWDT();
@@ -161,4 +177,7 @@ void WDT_SLEEP(void) {
     OPTION_REGbits.PS = WATCHDOG_PRESCALER_MAIN; //~576ms 
     CLRWDT();
     GIE = 1; //Global Interrupt Enable
+#else
+    __delay_ms(ECHO_WAIT); // WAIT ECHO
+#endif
 }
