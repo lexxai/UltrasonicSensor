@@ -15,7 +15,7 @@ Release v1.1.0:
 Used `Sleep()` instead of `__delay` in place where nou use measure of distance.
 For WakeUp from sleep state used WatchDog timer.
 When not measured distance calculation time is approx. for safety timers.
-~18ms of WatchDog bace time of RC acceptable for this task.
+~18ms of WatchDog base time of RC acceptable for this task.
 If want not use sleep function may redefine variable to `#define UseWatchDogForDelay 0` in `user.h`
 
 PS. HEX file need flash to PIC with detached UltraSound Module, because ECHO pin shared with VPP.
