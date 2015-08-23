@@ -85,6 +85,7 @@ void InitApp(void) {
 void init_serial() {
     UART_OUT = SER_BIT; // make hi level
     LATGPIO_FLUSH;
+    return;
 }
 
 void send_serial_byte(unsigned char data) {
@@ -114,6 +115,7 @@ void send_serial_byte(unsigned char data) {
     while (TMR0 & 1 << 7);
     TMR0 -= SER_BAUD; // wait a couple of baud for safety
     while (TMR0 & 1 << 7);
+    return;
 }
 
 void send_serial_byte2(unsigned char data) {
@@ -145,6 +147,7 @@ void send_serial_byte2(unsigned char data) {
     LATGPIO_FLUSH;
     _delay(BIT_DELAY);
     ei();
+    return;
 }
 
 #endif
@@ -180,4 +183,5 @@ void WDT_SLEEP(void) {
 #else
     __delay_ms(ECHO_WAIT); // WAIT ECHO
 #endif
+    return;
 }
