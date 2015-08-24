@@ -1,5 +1,5 @@
 # UltrasonicSensor
-UltrasonicSensor for presence detector of small room
+UltrasonicSensor for presence detector of object in small room
 
 ![Image of Shema project UltrasonisSensor](https://github.com/lexxai/UltrasonisSensor/blob/master/shema/shema3.png)
 
