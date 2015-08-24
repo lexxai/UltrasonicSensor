@@ -19,5 +19,4 @@ PS. HEX file need flash to PIC with detached UltraSound Module, because ECHO pin
 If need for debug know value of distance returned form UltraSound Module, connect RX pin of USB RS232 TTL module to GP0. And uncommet `#define DEBUG_UART` at `system.h`. Speed 9600 8N1. RealTerm application will help to show 16 bit value.
 
 
-Translate to English:
-https://translate.google.com/translate?depth=1&hl=uk&ie=UTF8&prev=_t&rurl=translate.google.com.ua&sl=uk&tl=en&u=https://github.com/lexxai/UltrasonicSensor
+[Translate to English](https://translate.google.com/translate?depth=1&hl=uk&ie=UTF8&prev=_t&rurl=translate.google.com.ua&sl=uk&tl=en&u=https://github.com/lexxai/UltrasonicSensor)
