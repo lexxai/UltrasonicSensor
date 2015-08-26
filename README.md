@@ -1,5 +1,5 @@
 # UltrasonicSensor
-UltrasonicSensor для визнаяення наявності об'єктів у малому приміщенні
+UltrasonicSensor для визначення наявності об'єктів у малому приміщенні
 
 ![Image of Shema project UltrasonisSensor](https://github.com/lexxai/UltrasonisSensor/blob/master/shema/shema.png)
 
