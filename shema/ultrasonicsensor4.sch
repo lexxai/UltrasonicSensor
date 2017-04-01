@@ -15711,7 +15711,7 @@ Output: 5.3V/500mA</text>
 <instance part="S2" gate="-1" x="147.32" y="165.1" rot="MR0"/>
 <instance part="S2" gate="-LED" x="147.32" y="152.4"/>
 <instance part="R1" gate="G$1" x="147.32" y="142.24" rot="R270"/>
-<instance part="R3" gate="G$1" x="172.72" y="142.24" rot="R270"/>
+<instance part="R3" gate="G$1" x="154.94" y="142.24" rot="R270"/>
 <instance part="GND5" gate="1" x="119.38" y="119.38" rot="R180"/>
 </instances>
 <busses>
@@ -15719,11 +15719,11 @@ Output: 5.3V/500mA</text>
 <nets>
 <net name="TRIG" class="0">
 <segment>
-<wire x1="0" y1="93.98" x2="-5.08" y2="93.98" width="0.1524" layer="91"/>
+<wire x1="5.08" y1="101.6" x2="-5.08" y2="101.6" width="0.1524" layer="91"/>
 <pinref part="IC1" gate="G$1" pin="GP5/CLKIN"/>
-<wire x1="-5.08" y1="93.98" x2="-5.08" y2="116.84" width="0.1524" layer="91"/>
+<wire x1="-5.08" y1="101.6" x2="-5.08" y2="116.84" width="0.1524" layer="91"/>
 <wire x1="-5.08" y1="116.84" x2="5.08" y2="116.84" width="0.1524" layer="91"/>
-<label x="0" y="93.98" size="1.778" layer="95" xref="yes"/>
+<label x="5.08" y="101.6" size="1.778" layer="95" xref="yes"/>
 </segment>
 <segment>
 <pinref part="JP3" gate="G$3" pin="2"/>
@@ -15740,6 +15740,11 @@ Output: 5.3V/500mA</text>
 <wire x1="147.32" y1="157.48" x2="137.16" y2="157.48" width="0.1524" layer="91"/>
 <junction x="137.16" y="157.48"/>
 <label x="137.16" y="127" size="1.778" layer="95" rot="R90"/>
+</segment>
+<segment>
+<pinref part="JP4" gate="G$3" pin="2"/>
+<wire x1="101.6" y1="106.68" x2="86.36" y2="106.68" width="0.1524" layer="91"/>
+<label x="86.36" y="106.68" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -15808,10 +15813,15 @@ Output: 5.3V/500mA</text>
 <wire x1="147.32" y1="116.84" x2="154.94" y2="116.84" width="0.1524" layer="91"/>
 <junction x="147.32" y="116.84"/>
 <pinref part="R1" gate="G$1" pin="2"/>
-<wire x1="147.32" y1="137.16" x2="147.32" y2="116.84" width="0.1524" layer="91"/>
+<wire x1="147.32" y1="137.16" x2="147.32" y2="129.54" width="0.1524" layer="91"/>
 <pinref part="GND5" gate="1" pin="GND"/>
+<wire x1="147.32" y1="129.54" x2="147.32" y2="116.84" width="0.1524" layer="91"/>
 <wire x1="119.38" y1="116.84" x2="119.38" y2="111.76" width="0.1524" layer="91"/>
 <junction x="119.38" y="111.76"/>
+<pinref part="R3" gate="G$1" pin="2"/>
+<wire x1="154.94" y1="137.16" x2="154.94" y2="129.54" width="0.1524" layer="91"/>
+<wire x1="154.94" y1="129.54" x2="147.32" y2="129.54" width="0.1524" layer="91"/>
+<junction x="147.32" y="129.54"/>
 </segment>
 </net>
 <net name="N$3" class="0">
@@ -15915,11 +15925,6 @@ Output: 5.3V/500mA</text>
 <pinref part="JP1" gate="A" pin="1"/>
 <wire x1="-10.16" y1="101.6" x2="-10.16" y2="114.3" width="0.1524" layer="91"/>
 <label x="-10.16" y="106.68" size="1.778" layer="95" rot="R90"/>
-</segment>
-<segment>
-<pinref part="IC1" gate="G$1" pin="GP3/!MCLR"/>
-<wire x1="5.08" y1="129.54" x2="-5.08" y2="129.54" width="0.1524" layer="91"/>
-<label x="-5.08" y="127.508" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$7" class="0">
@@ -16064,25 +16069,6 @@ Output: 5.3V/500mA</text>
 <wire x1="48.26" y1="180.34" x2="33.02" y2="180.34" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$4" class="0">
-<segment>
-<pinref part="JP3" gate="G$3" pin="1"/>
-<wire x1="114.3" y1="104.14" x2="142.24" y2="104.14" width="0.1524" layer="91"/>
-<wire x1="142.24" y1="104.14" x2="142.24" y2="101.6" width="0.1524" layer="91"/>
-<pinref part="USONIC" gate="J_ULTRASONIC" pin="5V"/>
-<wire x1="142.24" y1="101.6" x2="147.32" y2="101.6" width="0.1524" layer="91"/>
-<pinref part="C9" gate="G$1" pin="2"/>
-<wire x1="147.32" y1="101.6" x2="152.4" y2="101.6" width="0.1524" layer="91"/>
-<wire x1="152.4" y1="101.6" x2="154.94" y2="101.6" width="0.1524" layer="91"/>
-<wire x1="147.32" y1="99.06" x2="147.32" y2="101.6" width="0.1524" layer="91"/>
-<junction x="147.32" y="101.6"/>
-<pinref part="R3" gate="G$1" pin="2"/>
-<wire x1="172.72" y1="137.16" x2="172.72" y2="91.44" width="0.1524" layer="91"/>
-<wire x1="172.72" y1="91.44" x2="152.4" y2="91.44" width="0.1524" layer="91"/>
-<wire x1="152.4" y1="91.44" x2="152.4" y2="101.6" width="0.1524" layer="91"/>
-<junction x="152.4" y="101.6"/>
-</segment>
-</net>
 <net name="N$13" class="0">
 <segment>
 <pinref part="JP3" gate="G$3" pin="3"/>
@@ -16108,9 +16094,34 @@ Output: 5.3V/500mA</text>
 <net name="N$14" class="0">
 <segment>
 <pinref part="R3" gate="G$1" pin="1"/>
-<wire x1="172.72" y1="165.1" x2="172.72" y2="147.32" width="0.1524" layer="91"/>
+<wire x1="154.94" y1="165.1" x2="154.94" y2="147.32" width="0.1524" layer="91"/>
 <pinref part="S2" gate="-1" pin="1A"/>
-<wire x1="172.72" y1="165.1" x2="152.4" y2="165.1" width="0.1524" layer="91"/>
+<wire x1="154.94" y1="165.1" x2="152.4" y2="165.1" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="ECHO" class="0">
+<segment>
+<pinref part="IC1" gate="G$1" pin="GP3/!MCLR"/>
+<wire x1="5.08" y1="129.54" x2="-5.08" y2="129.54" width="0.1524" layer="91"/>
+<label x="-5.08" y="129.54" size="1.778" layer="95" rot="R180" xref="yes"/>
+</segment>
+<segment>
+<pinref part="JP4" gate="G$3" pin="3"/>
+<wire x1="101.6" y1="109.22" x2="96.52" y2="109.22" width="0.1524" layer="91"/>
+<label x="96.52" y="109.22" size="1.778" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="N$12" class="0">
+<segment>
+<pinref part="USONIC" gate="J_ULTRASONIC" pin="5V"/>
+<pinref part="JP3" gate="G$3" pin="1"/>
+<wire x1="114.3" y1="104.14" x2="142.24" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="104.14" x2="142.24" y2="101.6" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="101.6" x2="147.32" y2="101.6" width="0.1524" layer="91"/>
+<pinref part="C9" gate="G$1" pin="2"/>
+<wire x1="147.32" y1="99.06" x2="147.32" y2="101.6" width="0.1524" layer="91"/>
+<junction x="147.32" y="101.6"/>
+<wire x1="147.32" y1="101.6" x2="154.94" y2="101.6" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
