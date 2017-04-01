@@ -10,9 +10,9 @@ CND_CONF=XC8_PIC12F675
 CND_DISTDIR=dist
 TMPDIR=build/${CND_CONF}/${IMAGE_TYPE}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/UltrasonisSensor.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-OUTPUT_BASENAME=UltrasonisSensor.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-PACKAGE_TOP_DIR=ultrasonissensor.x/
+OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/UltrasonisSensor.X-ooo.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+OUTPUT_BASENAME=UltrasonisSensor.X-ooo.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+PACKAGE_TOP_DIR=ultrasonissensor.x-ooo/
 
 # Functions
 function checkReturnCode
@@ -57,15 +57,15 @@ mkdir -p ${TMPDIR}
 
 # Copy files and create directories and links
 cd "${TOP}"
-makeDirectory ${TMPDIR}/ultrasonissensor.x/bin
+makeDirectory ${TMPDIR}/ultrasonissensor.x-ooo/bin
 copyFileToTmpDir "${OUTPUT_PATH}" "${TMPDIR}/${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}" 0755
 
 
 # Generate tar file
 cd "${TOP}"
-rm -f ${CND_DISTDIR}/${CND_CONF}/package/ultrasonissensor.x.tar
+rm -f ${CND_DISTDIR}/${CND_CONF}/package/ultrasonissensor.x-ooo.tar
 cd ${TMPDIR}
-tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/ultrasonissensor.x.tar *
+tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/ultrasonissensor.x-ooo.tar *
 checkReturnCode
 
 # Cleanup

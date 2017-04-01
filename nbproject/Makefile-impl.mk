@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=UltrasonisSensor.X
+PROJECTNAME=UltrasonisSensor.X-ooo
 
 # Active Configuration
 DEFAULTCONF=XC8_PIC12F675
