@@ -30,16 +30,21 @@ void InitApp(void) {
 
     /* Setup analog functionality and port direction */
     ANSEL = 0; //Digital IN
+    
+    ADCON0 = 0x00;         // Shut off the A/D Converter
+    CMCON  = 0x07;         // Shut off the Comparator
+    VRCON  = 0x00;         // Shut off the Voltage Reference
 
-    ULTRASONIC_TRIGGER_TRISBIT = 0; //OUT 
-    ULTRASONIC_ECHO_TRISBIT = 1; //IN
+    ULTRASONIC_TRIGGER_TRISBIT = TRISIO_MODE_OUTPUT; //OUT 
+    ULTRASONIC_ECHO_TRISBIT = TRISIO_MODE_INPUT; //IN
 
-    DOOR_SENSOR_TRISBIT = 1; //IN
-    RELAY_TRISBIT = 0; //OUT
-
-    ULTRASONIC_POWER_TRISBIT = 0; //OUT  
+    DOOR_SENSOR_TRISBIT = TRISIO_MODE_INPUT; //IN
+    RELAY_TRISBIT = TRISIO_MODE_OUTPUT; //OUT
+    ULTRASONIC_POWER_TRISBIT = TRISIO_MODE_OUTPUT; //OUT
+    BUZZER_TRISBIT = TRISIO_MODE_OUTPUT; //OUT
+    
 #ifdef DEBUG_UART
-    UART_OUT_TRISBIT = 0; //OUT
+    UART_OUT_TRISBIT = TRISIO_MODE_OUTPUT; //OUT
 #endif
 
 
@@ -73,7 +78,7 @@ void InitApp(void) {
     GPIF = 0; //Clear GPIO On-Change Interrupt Flag
     IOC = ULTRASONIC_ECHO_MASK; //Enable On-Change Interrupt GPIO for ULTRASONIC_ECHO 
     GPIE = 1; //Enable GPIO On-Change Interrupt
-    GIE = 1; //Global Interrupt Enable
+    GIE = 0; //Global Interrupt Enable
 
 #ifdef DEBUG_UART
     init_serial();
@@ -170,7 +175,7 @@ void checkUltraSonicPowerforApply(void) {
 void WDT_SLEEP(void) {
 #if (UseWatchDogForDelay)
     //SLEEP THAT SIMULATE APPROXIMATLY WAIT ECHO ,WDT RC ~144ms, WAIT ECHO 142ms
-    GIE = 0; //Global Interrupt DISABLE
+    //GIE = 0; //Global Interrupt DISABLE
     CLRWDT();
     //tune watchdog time to sleep time approx. equal one loop delay
     OPTION_REGbits.PS = WATCHDOG_PRESCALER_SLEEP; //~144ms 
@@ -179,9 +184,11 @@ void WDT_SLEEP(void) {
     //now recover general watchdog time
     OPTION_REGbits.PS = WATCHDOG_PRESCALER_MAIN; //~576ms 
     CLRWDT();
-    GIE = 1; //Global Interrupt Enable
+    //GIE = 1; //Global Interrupt Enable
 #else
     __delay_ms(ECHO_WAIT); // WAIT ECHO
 #endif
     return;
 }
+
+ 
