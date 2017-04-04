@@ -55,178 +55,14 @@ void main(void) {
     ULTRASONIC_TRIGGER = ULTRASONIC_TRIGGER_OFF; // START POS TRIGGER LOW
     RELAY = Relay_off; // RELAY OFF WHEH POWER ON;
     ULTRASONIC_POWER = USonicPower_off;
-
     BUZZER = BUZZER_OFF;
-
     LATGPIO_FLUSH;
+    
     UltraSonicPower = USonicPower_on;
     checkUltraSonicPowerforApply();
+    
     HumanBodyWasPressed = false;
     bool PreviosStateLED;
-
-
-#if 0    
-    while (0) {
-
-
-        for (int i = 0; i < 5; i++) {
-            CLRWDT();
-            BUZZER = BUZZER_ON;
-            LATGPIO_FLUSH;
-            __delay_ms(3); // WAIT ECHO
-            BUZZER = BUZZER_OFF;
-            LATGPIO_FLUSH;
-            __delay_ms(120); // WAIT ECHO
-        }
-
-        CLRWDT();
-        __delay_ms(500); // WAIT ECHO
-        CLRWDT();
-        __delay_ms(500); // WAIT ECHO
-
-    }
-
-    while (0) {
-
-        //check door sensor , opened = 1 , closed = 0
-        if (DOOR_SENSOR == DOOR_OPENED) {
-            countActionDoor++;
-        } else {
-            countActionDoor--;
-        }
-
-        distance = 0; //reset distance
-
-        // checking door sensor
-        if (countActionDoor >= MAX_COUNT_TRY_DOOR) {
-            //if door opened, will skip measure distance
-            countActionPresent = MAX_COUNT_TRY_PRESENT;
-            countActionEmpty = 0;
-            countActionDoor = MAX_COUNT_TRY_DOOR;
-            if (DoorOpened == false) { // detect change state
-                DoorOpened = true;
-                UltraSonicPower = USonicPower_off; //if door opened measuring not required
-                HumanBodyWasPressed = false; //reset humman body button state                
-                checkUltraSonicPowerforApply();
-            }
-
-            WDT_SLEEP();
-
-        } else if (countActionDoor <= -MAX_COUNT_TRY_DOOR) {
-            // if door closed 
-            countActionDoor = -MAX_COUNT_TRY_DOOR;
-            // start measure distance 
-            if (DoorOpened == true) { // detect change state
-                DoorOpened = false;
-                SafeOffRelay = false;
-                UltraSonicPower = USonicPower_on;
-                checkUltraSonicPowerforApply();
-            }
-
-
-
-
-            //check if human body button was pressed
-            if (!HumanBodyWasPressed) {
-                CLRWDT();
-                PreviosStateLED = HUMAN_BUTTON_LED;
-                HUMAN_BUTTON_TRISBIT = TRISIO_MODE_INPUT;
-                HUMAN_BUTTON_WPU = 1; //WPU PULL-UP
-                if (HUMAN_BUTTON == HUMAN_BUTTON_PRESSED) {
-                    __delay_us(25); //simple debounce button 
-                    if (HUMAN_BUTTON == HUMAN_BUTTON_PRESSED) {
-                        HumanBodyWasPressed = true;
-                    }
-                }
-                //recover state of pin
-                HUMAN_BUTTON_TRISBIT = TRISIO_MODE_OUTPUT;
-                HUMAN_BUTTON_LED = PreviosStateLED;
-                LATGPIO_FLUSH;
-            }
-            //LED ILUMINATION
-            if (HumanBodyWasPressed) {
-                //switch off measuring
-                UltraSonicPower == USonicPower_off; //power off measure module 
-                checkUltraSonicPowerforApply();
-                //
-                //            if (ULTRASONIC_POWER == !UltraSonicPower) { // only change state
-                //                ULTRASONIC_POWER = UltraSonicPower;
-                //                LATGPIO_FLUSH;
-                //                __delay_us(20); //10uS Delay for start module
-                //            }
-
-                distance = DISTANCE_SET; // simulate measured disatnce as present
-                //HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
-                //LATGPIO_FLUSH;
-                //__delay_ms(10); // WAIT ECHO
-                HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_ON;
-                BUZZER = 1;
-                LATGPIO_FLUSH;
-                //__delay_ms(400); // WAIT ECHO
-                SLEEP(); // Included CLRWDT. WAKEUP BY WATCHDOG TIMEOUT  
-                NOP();
-                CLRWDT();
-                BUZZER = 0;
-                LATGPIO_FLUSH;
-            } else if (countActionEmpty) {
-                //BUZZER
-                for (int i = 0; i < 5; i++) {
-                    CLRWDT();
-                    BUZZER = BUZZER_ON;
-                    LATGPIO_FLUSH;
-                    __delay_ms(3); // WAIT ECHO
-                    BUZZER = BUZZER_OFF;
-                    LATGPIO_FLUSH;
-                    __delay_ms(120); // WAIT ECHO
-                }
-                CLRWDT();
-                __delay_ms(500); // WAIT ECHO
-
-                //LED state if Empty state was at least once detected
-                HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_ON;
-                BUZZER = BUZZER_ON;
-                LATGPIO_FLUSH;
-                __delay_ms(15); // WAIT 
-                HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
-                BUZZER = BUZZER_OFF;
-                LATGPIO_FLUSH;
-                __delay_ms(15); // WAIT                 
-            }
-
-            // try start measuring distance
-            if (UltraSonicPower == USonicPower_on) {
-                PreviosStateLED = HUMAN_BUTTON_LED;
-                ULTRASONIC_TRIGGER = ULTRASONIC_TRIGGER_OFF; //TRIGGER HIGH
-                LATGPIO_FLUSH;
-                __delay_us(TRIGGER_WAIT); //10uS Delay 
-                ULTRASONIC_TRIGGER = ULTRASONIC_TRIGGER_ON; //TRIGGER HIGH
-                LATGPIO_FLUSH;
-                GIE = 1; //Global Interrupt ENABLE (measuring enable)
-                __delay_us(TRIGGER_WAIT); //10uS Delay 
-                ULTRASONIC_TRIGGER = ULTRASONIC_TRIGGER_OFF; //TRIGGER LOW
-                LATGPIO_FLUSH;
-                WDT_SLEEP();
-                //__delay_ms(ECHO_WAIT); // WAIT ECHO
-                GIE = 0; //Global Interrupt DISABLE (measuring disable) 
-                HUMAN_BUTTON_LED = PreviosStateLED;
-                LATGPIO_FLUSH;
-            } else {
-                WDT_SLEEP();
-            }
-            // end measuring dista
-
-
-
-
-
-        }
-
-
-        WDT_SLEEP();
-        LATGPIO_FLUSH; // flush to real GPIO port by all 8 bits
-
-    }
-#endif
 
     while (1) {
 
@@ -264,7 +100,8 @@ void main(void) {
                 UltraSonicPower = USonicPower_on;
                 checkUltraSonicPowerforApply();
             }
-
+            
+            //if UltraSonicPower is off skip most of measuring operation
             if (UltraSonicPower == USonicPower_on) {
                 //check if human body button was pressed
                 if (!HumanBodyWasPressed) {
@@ -286,17 +123,6 @@ void main(void) {
                 }
                 //start HumanBodyWasPressed ?
                 if (HumanBodyWasPressed) {
-                    //HumanBody Pressed                
-                    //switch off measuring
-                    //UltraSonicPower == USonicPower_off; //power off measure module 
-                    //checkUltraSonicPowerforApply();
-
-                    //                if (ULTRASONIC_POWER == !UltraSonicPower) { // only change state
-                    //                    ULTRASONIC_POWER = UltraSonicPower;
-                    //                    LATGPIO_FLUSH;
-                    //                    __delay_us(20); //10uS Delay for start module
-                    //                }
-
                     distance = DISTANCE_LIMIT_LOW; // simulate measured disatnce as present
                     countActionPresent = MAX_COUNT_TRY_PRESENT;
                     countActionEmpty = 0;
@@ -309,6 +135,7 @@ void main(void) {
                     NOP();
                     CLRWDT();
                 } else if (countActionEmpty) {
+                    //LED ON - BUZZER - LED OFF
                     //HumanBody not Pressed  and empty
                     //LED state if Empty state was at least once detected
                     HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_ON;
@@ -342,6 +169,8 @@ void main(void) {
                 }
                 //end HumanBodyWasPressed ?
             }
+            
+            
             // try start measuring distance
             if (UltraSonicPower == USonicPower_on && !HumanBodyWasPressed) {
                 PreviosStateLED = HUMAN_BUTTON_LED;
@@ -377,7 +206,6 @@ void main(void) {
         } else {
             WDT_SLEEP(); //delay for checking door state
         }
-        
         
         
         //count Actions try for simulate timeout of Actions
