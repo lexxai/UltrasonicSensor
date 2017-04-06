@@ -132,7 +132,6 @@ void main(void) {
                 }
                 //start HumanBodyWasPressed ?
                 if (HumanBodyWasPressed) {
-                    distance = DISTANCE_LIMIT_LOW; // simulate measured disatnce as present
                     countActionPresent = MAX_COUNT_TRY_PRESENT;
                     countActionEmpty = 0;
                     RELAY = Relay_on; //RELAY ON
@@ -198,6 +197,8 @@ void main(void) {
                 di(); // GIE = 0; //Global Interrupt DISABLE (measuring disable) 
                 HUMAN_BUTTON_LED = PreviosStateLED;
                 LATGPIO_FLUSH;
+            }else{
+                distance = DISTANCE_LIMIT_LOW; // simulate measured disatnce as present
             }
             // end measuring distance 
 
