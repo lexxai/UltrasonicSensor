@@ -64,16 +64,16 @@ volatile union {
 #define ECHO_WAIT               142                  //ms
 #define ECHO_WAIT_PER_SEC       1000/ECHO_WAIT       //loops per second
 
-#define MAX_COUNT_TRY_PRESENT   ECHO_WAIT_PER_SEC*1  //seconds  (7)   u8bit
-#define MAX_COUNT_TRY_EMPTY     ECHO_WAIT_PER_SEC*15 //seconds  (315) u16bit
-#define MAX_COUNT_TRY_DOOR      ECHO_WAIT_PER_SEC/3  //seconds  (2)   u8bit
-#define MAX_COUNT_TRY_EMPTY_BEPPS   MAX_COUNT_TRY_EMPTY/4   //define max beeps 
-#define SKEEP_BEPPS             ECHO_WAIT_PER_SEC*3;        //beeps every sec u8bit
+#define MAX_COUNT_TRY_PRESENT   ECHO_WAIT_PER_SEC*1  // 1 seconds  (7)   u8bit
+#define MAX_COUNT_TRY_EMPTY     ECHO_WAIT_PER_SEC*45 // 45 seconds  (315) u16bit
+#define MAX_COUNT_TRY_DOOR      ECHO_WAIT_PER_SEC/3  // 1/3 seconds  (2)   u8bit
+#define MAX_COUNT_TRY_EMPTY_BEPPS   MAX_COUNT_TRY_EMPTY/4   //define 4 max beeps for all wait period
+#define SKEEP_BEPPS             ECHO_WAIT_PER_SEC*5;    //beeps every 8 sec u8bit
 
 #define MINUTES                 60                    //seconds
-#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*15 //minutes (6300)  u16bit
-#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*60 //minutes (25200) u16bit
-#define USonicPower_OFF_DELAY   ECHO_WAIT_PER_SEC*MINUTES/2 //minutes  (210)   u16bit
+#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*15 // 15 minutes (6300)  u16bit
+#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*60 // 60 minutes (25200) u16bit
+#define USonicPower_OFF_DELAY   ECHO_WAIT_PER_SEC*MINUTES    // 1 minutes  (420)   u16bit
 /* TIMESPECIFIC DEFINITION */
 
 // Active pin states for output

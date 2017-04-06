@@ -41,3 +41,5 @@
 #pragma config BOREN = ON       // Brown-out Detect Enable bit (BOD disabled)
 #pragma config CP = OFF         // Code Protection bit (Program Memory code protection is disabled)
 #pragma config CPD = OFF        // Data Code Protection bit (Data memory code protection is disabled)
+
+//OSCCAL 3444 of my PIC 12F675
