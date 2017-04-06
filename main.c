@@ -237,14 +237,14 @@ void main(void) {
         //when safety timer timeout then switch off relay in any case
         if ((TimerStateOn >= MAX_TIME_ON)) {
             //general safe timeout
-            //RELAY = Relay_off; //RELAY OFF
+            RELAY = Relay_off; //RELAY OFF
             TimerStateOff = USonicPower_OFF_DELAY; //need power off of USOUND module and LED
             TimerStateOn = MAX_TIME_ON;
             SafeOffRelay = true;
         } else if (TimerStateOn >= MAX_DOOR_TIME_ON) {
             if (countActionDoor >= MAX_COUNT_TRY_DOOR) {
                 //if door opened is then safe timeout                
-                //RELAY = Relay_off; //RELAY OFF  
+                RELAY = Relay_off; //RELAY OFF  
                 HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
                 SafeOffRelay = true;
             }
