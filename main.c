@@ -51,18 +51,23 @@ void main(void) {
     countActionPresent = 0;
     countActionDoor = 0;
     countSkipBeep = SKEEP_BEPPS;
-    GIE = 0; //Global Interrupt DISABLE (measuring disable) 
+    di(); //GIE = 0; //Global Interrupt DISABLE (measuring disable) 
     ULTRASONIC_TRIGGER = ULTRASONIC_TRIGGER_OFF; // START POS TRIGGER LOW
     RELAY = Relay_off; // RELAY OFF WHEH POWER ON;
     ULTRASONIC_POWER = USonicPower_off;
     BUZZER = BUZZER_OFF;
     LATGPIO_FLUSH;
-    
+
     UltraSonicPower = USonicPower_on;
     checkUltraSonicPowerforApply();
-    
+
     HumanBodyWasPressed = false;
     bool PreviosStateLED;
+    bool NeedMeasureDistance = false;
+    bool NeedFlashAndBuzze = false;
+
+    TimerStateOn = 0;
+    TimerStateOff = 0;
 
     while (1) {
 
@@ -74,24 +79,25 @@ void main(void) {
         }
 
         distance = 0; //reset distance
+        NeedMeasureDistance = false;
 
         // checking door sensor
         if (countActionDoor >= MAX_COUNT_TRY_DOOR) {
-            //if door opened, will skip measure distance
+            // door opened
             countActionPresent = MAX_COUNT_TRY_PRESENT;
             countActionEmpty = 0;
             countActionDoor = MAX_COUNT_TRY_DOOR;
             if (DoorOpened == false) { // detect change state
                 DoorOpened = true;
+                //will skip measure distance
                 UltraSonicPower = USonicPower_off; //if door opened measuring not required
                 HumanBodyWasPressed = false; //reset humman body button state                
+                HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
                 checkUltraSonicPowerforApply();
             }
 
-            WDT_SLEEP();
-
         } else if (countActionDoor <= -MAX_COUNT_TRY_DOOR) {
-            // if door closed 
+            //  door closed 
             countActionDoor = -MAX_COUNT_TRY_DOOR;
             // start measure distance 
             if (DoorOpened == true) { // detect change state
@@ -100,7 +106,10 @@ void main(void) {
                 UltraSonicPower = USonicPower_on;
                 checkUltraSonicPowerforApply();
             }
-            
+        }
+
+        //DOOR CLOSED
+        if (DoorOpened == false) {
             //if UltraSonicPower is off skip most of measuring operation
             if (UltraSonicPower == USonicPower_on) {
                 //check if human body button was pressed
@@ -130,63 +139,65 @@ void main(void) {
                     //LED ILUMINATION
                     HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_ON;
                     LATGPIO_FLUSH;
-                    //__delay_ms(400); // WAIT ECHO
-                    SLEEP(); // Included CLRWDT. WAKEUP BY WATCHDOG TIMEOUT  
-                    NOP();
-                    CLRWDT();
+                    UltraSonicPower = USonicPower_off;
+                    checkUltraSonicPowerforApply();
                 } else if (countActionEmpty) {
-                    //LED ON - BUZZER - LED OFF
-                    //HumanBody not Pressed  and empty
-                    //LED state if Empty state was at least once detected
-                    HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_ON;
-                    LATGPIO_FLUSH;
-
-                    //BUZZER
-                    if (RELAY == Relay_on) {
-                        countSkipBeep--;
-                        if (countSkipBeep <= 0) {
-                            countSkipBeep = SKEEP_BEPPS;
-                            for (int i = countActionEmpty; i >= MAX_COUNT_TRY_EMPTY_BEPPS; i = i - MAX_COUNT_TRY_EMPTY_BEPPS) {
-                                CLRWDT();
-                                BUZZER = BUZZER_ON;
-                                LATGPIO_FLUSH;
-                                __delay_ms(3); // beep ON
-                                BUZZER = BUZZER_OFF;
-                                LATGPIO_FLUSH;
-                                __delay_ms(180); // WAIT BEEP off 
-                            }
-                        } else {
-                            __delay_ms(15); // WAIT FOR LED
-                        }
-                        CLRWDT();
-                    } else {
-                        __delay_ms(15); // WAIT FOR LED
-                    }
-
-                    HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
-                    LATGPIO_FLUSH;
-                    __delay_ms(15); // WAIT                 
+                    NeedFlashAndBuzze = true;
                 }
                 //end HumanBodyWasPressed ?
             }
-            
-            
+
+            NeedMeasureDistance = UltraSonicPower == USonicPower_on && !HumanBodyWasPressed;
+
+            if (NeedFlashAndBuzze) {
+                //LED ON - BUZZER - LED OFF
+                //HumanBody not Pressed  and empty
+                //LED state if Empty state was at least once detected
+
+                NeedFlashAndBuzze = false;
+                HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_ON;
+                LATGPIO_FLUSH;
+
+                //BUZZER
+                if (RELAY == Relay_on) {
+                    countSkipBeep--;
+                    if (countSkipBeep <= 0) {
+                        countSkipBeep = SKEEP_BEPPS;
+                        for (int i = countActionEmpty; i >= MAX_COUNT_TRY_EMPTY_BEPPS; i = i - MAX_COUNT_TRY_EMPTY_BEPPS) {
+                            CLRWDT();
+                            BUZZER = BUZZER_ON;
+                            LATGPIO_FLUSH;
+                            __delay_ms(7); // beep ON
+                            BUZZER = BUZZER_OFF;
+                            LATGPIO_FLUSH;
+                            __delay_ms(180); // WAIT BEEP off 
+                        }
+                    } else {
+                        __delay_ms(15); // WAIT FOR LED
+                    }
+                } else {
+                    __delay_ms(15); // WAIT FOR LED
+                }
+                CLRWDT();
+                HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
+                LATGPIO_FLUSH;
+            }
+
             // try start measuring distance
-            if (UltraSonicPower == USonicPower_on && !HumanBodyWasPressed) {
+            if (NeedMeasureDistance) {
                 PreviosStateLED = HUMAN_BUTTON_LED;
                 ULTRASONIC_TRIGGER = ULTRASONIC_TRIGGER_ON; //TRIGGER HIGH
                 LATGPIO_FLUSH;
                 __delay_us(TRIGGER_WAIT); //10uS Delay 
-                GIE = 1; //Global Interrupt ENABLE (measuring enable)                
+                ei(); //GIE = 1; //Global Interrupt ENABLE (measuring enable)                
                 ULTRASONIC_TRIGGER = ULTRASONIC_TRIGGER_OFF; //TRIGGER LOW
                 LATGPIO_FLUSH;
+                CLRWDT();
                 __delay_ms(ECHO_WAIT); // WAIT ECHO
                 //WDT_SLEEP();
-                GIE = 0; //Global Interrupt DISABLE (measuring disable) 
+                di(); // GIE = 0; //Global Interrupt DISABLE (measuring disable) 
                 HUMAN_BUTTON_LED = PreviosStateLED;
                 LATGPIO_FLUSH;
-            } else {
-                WDT_SLEEP(); //measure skip, just wait door change state
             }
             // end measuring distance 
 
@@ -203,11 +214,9 @@ void main(void) {
                 countActionEmpty++;
                 countActionPresent = 0;
             }
-        } else {
-            WDT_SLEEP(); //delay for checking door state
-        }
-        
-        
+        } //DOOR CLOSED
+
+
         //count Actions try for simulate timeout of Actions
         if ((countActionPresent >= MAX_COUNT_TRY_PRESENT) && !SafeOffRelay) {
             RELAY = Relay_on; //RELAY ON 
@@ -227,17 +236,19 @@ void main(void) {
         //when safety timer timeout then switch off relay in any case
         if ((TimerStateOn >= MAX_TIME_ON)) {
             //general safe timeout
-            RELAY = Relay_off; //RELAY OFF
+            //RELAY = Relay_off; //RELAY OFF
+            TimerStateOff = USonicPower_OFF_DELAY; //need power off of USOUND module and LED
             TimerStateOn = MAX_TIME_ON;
             SafeOffRelay = true;
         } else if (TimerStateOn >= MAX_DOOR_TIME_ON) {
             if (countActionDoor >= MAX_COUNT_TRY_DOOR) {
                 //if door opened is then safe timeout                
-                RELAY = Relay_off; //RELAY OFF  
+                //RELAY = Relay_off; //RELAY OFF  
                 HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
                 SafeOffRelay = true;
             }
         }
+
         if (RELAY == Relay_on) {
             //tick for Timer of StateOn
             TimerStateOn++;
@@ -245,6 +256,7 @@ void main(void) {
             TimerStateOn = 0;
             TimerStateOff++;
             if (TimerStateOff >= USonicPower_OFF_DELAY) {
+                //power off of USOUND module and LED by timeout
                 TimerStateOff = USonicPower_OFF_DELAY;
                 UltraSonicPower = USonicPower_off;
                 HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
@@ -252,7 +264,25 @@ void main(void) {
                 checkUltraSonicPowerforApply();
             }
         }
+
         LATGPIO_FLUSH; // flush to real GPIO port by all 8 bits
+
+        if (!NeedMeasureDistance) {
+            //delay only if not used measuring was
+#if (UseWatchDogForDelay)
+            // __delay with watchdog
+            OPTION_REGbits.PS = WATCHDOG_PRESCALER_SLEEP; //~144ms 
+            SLEEP(); // Included CLRWDT. WAKEUP BY WATCHDOG TIMEOUT  
+            NOP();
+            //now recover general watchdog time
+            OPTION_REGbits.PS = WATCHDOG_PRESCALER_MAIN; //~576ms 
+            CLRWDT();
+#else
+            CLRWDT();
+            __delay_ms(ECHO_WAIT); // WAIT ECHO
+#endif
+        }
+
 #ifdef DEBUG_UART
         init_serial();
         __delay_us(200); //200uS Delay 
