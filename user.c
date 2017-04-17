@@ -35,12 +35,16 @@ void InitApp(void) {
     CMCON  = 0x07;         // Shut off the Comparator
     VRCON  = 0x00;         // Shut off the Voltage Reference
 
-    ULTRASONIC_TRIGGER_TRISBIT = TRISIO_MODE_OUTPUT; //OUT 
-    ULTRASONIC_ECHO_TRISBIT = TRISIO_MODE_INPUT; //IN
+    MEASUREMODULE_TRIGGER_TRISBIT = TRISIO_MODE_OUTPUT; //OUT 
+    MEASUREMODULE_ECHO_TRISBIT = TRISIO_MODE_INPUT; //IN
 
-    DOOR_SENSOR_TRISBIT = TRISIO_MODE_INPUT; //IN
-    RELAY_TRISBIT = TRISIO_MODE_OUTPUT; //OUT
-    ULTRASONIC_POWER_TRISBIT = TRISIO_MODE_OUTPUT; //OUT
+    //DOOR_SENSOR_TRISBIT = TRISIO_MODE_INPUT; //IN
+    pinMode(DOOR_SENSOR_TRISBIT,TRISIO_MODE_INPUT);
+    
+    //LIGHT_RELAY_TRISBIT = TRISIO_MODE_OUTPUT; //OUT
+    pinMode(LIGHT_RELAY_TRISBIT,TRISIO_MODE_OUTPUT);
+    
+    MEASUREMODULE_POWER_TRISBIT = TRISIO_MODE_OUTPUT; //OUT
     BUZZER_TRISBIT = TRISIO_MODE_OUTPUT; //OUT
     
 #ifdef DEBUG_UART
@@ -76,9 +80,9 @@ void InitApp(void) {
 
     /* Enable interrupts */
     GPIF = 0; //Clear GPIO On-Change Interrupt Flag
-    IOC = ULTRASONIC_ECHO_MASK; //Enable On-Change Interrupt GPIO for ULTRASONIC_ECHO 
+    IOC = MEASUREMODULE_ECHO_MASK; //Enable On-Change Interrupt GPIO for MEASUREMODULE_ECHO 
     GPIE = 1; //Enable GPIO On-Change Interrupt
-    GIE = 0; //Global Interrupt Enable
+    di(); //GIE = 0; //Global Interrupt disable
 
 #ifdef DEBUG_UART
     init_serial();
@@ -159,10 +163,10 @@ void send_serial_byte2(unsigned char data) {
 
 void checkUltraSonicPowerforApply(void) {
 #ifndef DEBUG_UART
-    if (ULTRASONIC_POWER == !UltraSonicPower) { // only change state
-        ULTRASONIC_POWER = UltraSonicPower;
+    if (MEASUREMODULE_POWER == !MeasureModulePower) { // only change state
+        MEASUREMODULE_POWER = MeasureModulePower;
 #else
-    ULTRASONIC_POWER = USonicPower_on;
+    MEASUREMODULE_POWER = MeasureModulePower_on;
 #endif                
         LATGPIO_FLUSH;
         __delay_us(20); //10uS Delay for start module

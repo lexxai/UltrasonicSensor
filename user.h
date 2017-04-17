@@ -8,20 +8,20 @@ volatile union {
 
 #define LATGPIO_FLUSH GPIO = LATGPIO.byte
 
-#define ULTRASONIC_POWER                LATGPIO.bits.GP4
-#define ULTRASONIC_POWER_BIT            GP4_bit
-#define ULTRASONIC_POWER_TRISBIT        TRISIObits.TRISIO4
+#define MEASUREMODULE_POWER                LATGPIO.bits.GP4
+#define MEASUREMODULE_POWER_BIT            GP4_bit
+#define MEASUREMODULE_POWER_TRISBIT        TRISIObits.TRISIO4
 
-#define ULTRASONIC_TRIGGER              LATGPIO.bits.GP5
-#define ULTRASONIC_TRIGGER_BIT          GP5_bit
-#define ULTRASONIC_TRIGGER_TRISBIT      TRISIObits.TRISIO5
-#define ULTRASONIC_TRIGGER_ON           1 
-#define ULTRASONIC_TRIGGER_OFF          !ULTRASONIC_TRIGGER_ON
+#define MEASUREMODULE_TRIGGER              LATGPIO.bits.GP5
+#define MEASUREMODULE_TRIGGER_BIT          GP5_bit
+#define MEASUREMODULE_TRIGGER_TRISBIT      TRISIObits.TRISIO5
+#define MEASUREMODULE_TRIGGER_ON           1 
+#define MEASUREMODULE_TRIGGER_OFF          !MEASUREMODULE_TRIGGER_ON
 
-#define ULTRASONIC_ECHO                 GP3
-#define ULTRASONIC_ECHO_BIT             GP3_bit
-#define ULTRASONIC_ECHO_MASK            _GPIO_GP3_MASK
-#define ULTRASONIC_ECHO_TRISBIT         TRISIObits.TRISIO3
+#define MEASUREMODULE_ECHO                 GP3
+#define MEASUREMODULE_ECHO_BIT             GP3_bit
+#define MEASUREMODULE_ECHO_MASK            _GPIO_GP3_MASK
+#define MEASUREMODULE_ECHO_TRISBIT         TRISIObits.TRISIO3
 
 #define DOOR_SENSOR                     GP2
 #define DOOR_SENSOR_BIT                 GP2_bit
@@ -30,9 +30,9 @@ volatile union {
 
 #define DOOR_OPENED                     1
 
-#define RELAY                           LATGPIO.bits.GP1
-#define RELAY_BIT                       GP1_bit
-#define RELAY_TRISBIT                   TRISIObits.TRISIO1
+#define LIGHT_RELAY                     LATGPIO.bits.GP1
+#define LIGHT_RELAY_BIT                 GP1_bit
+#define LIGHT_RELAY_TRISBIT             TRISIObits.TRISIO1
 
 #define HUMAN_BUTTON                    GP5
 #define HUMAN_BUTTON_BIT                GP5_bit
@@ -40,7 +40,7 @@ volatile union {
 #define HUMAN_BUTTON_WPU                WPUbits.WPU5
 #define HUMAN_BUTTON_PRESSED            0
 
-#define HUMAN_BUTTON_LED                ULTRASONIC_TRIGGER
+#define HUMAN_BUTTON_LED                MEASUREMODULE_TRIGGER
 #define HUMAN_BUTTON_LED_BIT            HUMAN_BUTTON_BIT
 #define HUMAN_BUTTON_LED_TRISBIT        HUMAN_BUTTON_TRISBIT
 #define HUMAN_BUTTON_LED_ON             1
@@ -71,17 +71,17 @@ volatile union {
 #define SKEEP_BEPPS             ECHO_WAIT_PER_SEC*5;    //beeps every 8 sec u8bit
 
 #define MINUTES                 60                    //seconds
-#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*15 // 15 minutes (6300)  u16bit
-#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*60 // 60 minutes (25200) u16bit
-#define USonicPower_OFF_DELAY   ECHO_WAIT_PER_SEC*MINUTES    // 1 minutes  (420)   u16bit
+#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*1 // 15 minutes (6300)  u16bit
+#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*2 // 60 minutes (25200) u16bit
+#define MEASURE_MODULE_POWER_OFF_DELAY   ECHO_WAIT_PER_SEC*MINUTES    // 1 minutes  (420)   u16bit
 /* TIMESPECIFIC DEFINITION */
 
 // Active pin states for output
 #define Relay_on                true
 #define Relay_off               !Relay_on
 
-#define USonicPower_on          false
-#define USonicPower_off         !USonicPower_on
+#define MeasureModulePower_on          false
+#define MeasureModulePower_off         !MeasureModulePower_on
 
 
 #define UseWatchDogForDelay      1
@@ -90,9 +90,10 @@ volatile union {
 #define WATCHDOG_PRESCALER_SLEEP 0b011  // WDT rate 1:8,  ~144ms  
 
 
-#define  TRISIO_MODE_OUTPUT  0; //OUT 
-#define  TRISIO_MODE_INPUT   1; //IN 
+#define  TRISIO_MODE_OUTPUT  0 //OUT 
+#define  TRISIO_MODE_INPUT   1 //IN 
 
+#define pinMode(TRISBIT, TRISIO_MODE) TRISBIT = TRISIO_MODE
 
 /* TODO Application specific user parameters used in user.c may go here */
 
@@ -103,13 +104,13 @@ volatile union {
 volatile uint16_t distance;
 uint8_t countActionPresent;
 uint16_t countActionEmpty;
-int8_t countActionDoor;
+int8_t countDebounceDoor;
 int8_t countSkipBeep;
 uint16_t TimerStateOn;
 uint16_t TimerStateOff;
 bool DoorOpened = false;
 
-bool UltraSonicPower = true; //1-on,2-off
+bool MeasureModulePower = MeasureModulePower_off; //1-on,2-off
 bool SafeOffRelay = false; // true if was relay off by safe timer
 
 bool HumanBodyWasPressed = false; //if human button pressed measuring ignored
