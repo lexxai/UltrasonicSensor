@@ -71,8 +71,8 @@ volatile union {
 #define SKEEP_BEPPS             ECHO_WAIT_PER_SEC*5;    //beeps every 8 sec u8bit
 
 #define MINUTES                 60                    //seconds
-#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*1 // 15 minutes (6300)  u16bit
-#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*2 // 60 minutes (25200) u16bit
+#define MAX_DOOR_TIME_ON        ECHO_WAIT_PER_SEC*MINUTES*15 // 15 minutes (6300)  u16bit
+#define MAX_TIME_ON             ECHO_WAIT_PER_SEC*MINUTES*60 // 60 minutes (25200) u16bit
 #define MEASURE_MODULE_POWER_OFF_DELAY   ECHO_WAIT_PER_SEC*MINUTES    // 1 minutes  (420)   u16bit
 /* TIMESPECIFIC DEFINITION */
 
@@ -93,7 +93,12 @@ volatile union {
 #define  TRISIO_MODE_OUTPUT  0 //OUT 
 #define  TRISIO_MODE_INPUT   1 //IN 
 
+#define WPU_MODE_ON          1
+#define WPU_MODE_OFF         0
+
 #define pinMode(TRISBIT, TRISIO_MODE) TRISBIT = TRISIO_MODE
+#define pinModePullUP(WPU, WPU_MODE) WPU = WPU_MODE
+
 
 /* TODO Application specific user parameters used in user.c may go here */
 
@@ -128,4 +133,4 @@ void send_serial_byte2(unsigned char data);
 #endif
 
 void WDT_SLEEP(void);
-void checkUltraSonicPowerforApply(void);
+void checkMeasureModulePowerforApply(void);

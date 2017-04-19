@@ -46,7 +46,7 @@ void interrupt isr(void) {
         }
     }
     GPIF = 0; //Clear GP On-Change Interrupt flag
-    //GPIE = 1; //Enable GP On-Change Interrupt            
+    GPIE = 1; //Enable GP On-Change Interrupt            
 #endif
 
 }

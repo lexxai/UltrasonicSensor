@@ -56,7 +56,7 @@ void InitApp(void) {
 
     //WEAK PULL-UP for door sensor
     WPU = 0; //Pull-up disable for all ports
-    DOOR_SENSOR_WPU = 1; //Pull-up enabled for door sensor port (reed switch)
+    pinModePullUP(DOOR_SENSOR_WPU,1);//DOOR_SENSOR_WPU = 1; //Pull-up enabled for door sensor port (reed switch)
     OPTION_REGbits.nGPPU = 0; // enable individual pull-ups
 
 
@@ -161,7 +161,7 @@ void send_serial_byte2(unsigned char data) {
 
 #endif
 
-void checkUltraSonicPowerforApply(void) {
+void checkMeasureModulePowerforApply(void) {
 #ifndef DEBUG_UART
     if (MEASUREMODULE_POWER == !MeasureModulePower) { // only change state
         MEASUREMODULE_POWER = MeasureModulePower;

@@ -41,9 +41,9 @@
 // ********************  MAIN  ************************
 
 typedef enum {
-    UNDEFINED = 0b00,
-    OPENED = 0b01,
-    CLOSED = 0b10
+    UNDEFINED   = 0b00,
+    OPENED      = 0b01,
+    CLOSED      = 0b10
 } STATES_t;
 
 typedef struct {
@@ -67,7 +67,7 @@ void main(void) {
     countActionPresent = 0;
     countDebounceDoor = 0;
     countSkipBeep = SKEEP_BEPPS;
-    GPIE = 0; //Disble GPIO On-Change Interrupt
+    //GPIE = 0; //Disble GPIO On-Change Interrupt
     di(); //GIE = 0; //Global Interrupt DISABLE (measuring disable) 
     MEASUREMODULE_TRIGGER = MEASUREMODULE_TRIGGER_OFF; // START POS TRIGGER LOW
     LIGHT_RELAY = Relay_off; // RELAY OFF WHEH POWER ON;
@@ -76,11 +76,9 @@ void main(void) {
     LATGPIO_FLUSH;
 
     MeasureModulePower = MeasureModulePower_on;
-    checkUltraSonicPowerforApply();
+    checkMeasureModulePowerforApply();
 
     bool PreviosStateLED;
-    bool NeedMeasureDistance = false;
-    bool NeedFlashAndBuzze = false;
 
     STATESTORE_t states;
     states.DOOR = UNDEFINED; //DOOR_STATE_UNDEFINED;
@@ -90,7 +88,6 @@ void main(void) {
     states.NeedMeasureDistance = 0;
     states.MeasuredDistance = 0;
     states.HumanBodyButton_Pressed = 0;
-    //STATES_t doorState = UNDEFINED; //DOOR_STATE_UNDEFINED;
 
     TimerStateOn = 0;
     TimerStateOff = 0;
@@ -138,10 +135,10 @@ void main(void) {
             states.HumanBodyButton_Pressed = false;
             BUZZER = BUZZER_OFF;
             HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
-            if (states.DOOR = CLOSED) {
+            if (states.DOOR == CLOSED) {
                 //Control of Power MeasureModule
                 MeasureModulePower = MeasureModulePower_on;
-                checkUltraSonicPowerforApply();
+                checkMeasureModulePowerforApply();
             }
         }
 
@@ -152,7 +149,7 @@ void main(void) {
             LIGHT_RELAY = Relay_on; //RELAY On
             //Control of Power MeasureModule
             MeasureModulePower = MeasureModulePower_off;
-            checkUltraSonicPowerforApply();
+            checkMeasureModulePowerforApply();
         }
 
         //------------------------------------------------
@@ -167,7 +164,7 @@ void main(void) {
                     CLRWDT();
                     PreviosStateLED = HUMAN_BUTTON_LED;
                     pinMode(HUMAN_BUTTON_TRISBIT, TRISIO_MODE_INPUT);
-                    HUMAN_BUTTON_WPU = 1; //WPU PULL-UP
+                    pinModePullUP(HUMAN_BUTTON_WPU, WPU_MODE_ON); // HUMAN_BUTTON_WPU = 1; //WPU PULL-UP
                     __delay_us(5);
                     if (HUMAN_BUTTON == HUMAN_BUTTON_PRESSED) {
                         __delay_us(25); //simple debounce button 
@@ -191,6 +188,7 @@ void main(void) {
                     //LED ILUMINATION
                     HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_ON;
                     MeasureModulePower = MeasureModulePower_off;
+                    checkMeasureModulePowerforApply();
                 } else if (countActionEmpty) {
                     states.NeedFlashAndBuzze = true;
                 }
@@ -198,8 +196,6 @@ void main(void) {
 
             }
         }
-
-        states.NeedMeasureDistance = (MeasureModulePower == MeasureModulePower_on) && !states.HumanBodyButton_Pressed;
 
         if (states.NeedFlashAndBuzze) {
             states.NeedFlashAndBuzze = false;
@@ -237,31 +233,30 @@ void main(void) {
             HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
             LATGPIO_FLUSH;
         }
-
+        states.NeedMeasureDistance = (MeasureModulePower == MeasureModulePower_on) && !states.HumanBodyButton_Pressed;
         // try start measuring distance
         if (states.NeedMeasureDistance) {
             PreviosStateLED = HUMAN_BUTTON_LED;
             MEASUREMODULE_TRIGGER = MEASUREMODULE_TRIGGER_ON; //TRIGGER HIGH
             LATGPIO_FLUSH;
             __delay_us(TRIGGER_WAIT); //10uS Delay 
-            MEASUREMODULE_ECHO = 0;
+            //MEASUREMODULE_ECHO = 0;
             GPIE = 1; //Enable GP On-Change Interrupt 
             ei(); //GIE = 1; //Global Interrupt ENABLE (measuring enable)                
             MEASUREMODULE_TRIGGER = MEASUREMODULE_TRIGGER_OFF; //TRIGGER LOW
             LATGPIO_FLUSH;
             CLRWDT();
             __delay_ms(ECHO_WAIT); // WAIT ECHO
-            states.MeasuredDistance = true;
             //WDT_SLEEP();
             di(); // GIE = 0; //Global Interrupt DISABLE (measuring disable) 
             GPIE = 0; //Disable GP On-Change Interrupt
+            states.MeasuredDistance = true;
             HUMAN_BUTTON_LED = PreviosStateLED;
             LATGPIO_FLUSH;
         } else {
             distance = DISTANCE_LIMIT_LOW; // simulate measured disatnce as present
         }
         // end measuring distance 
-
 
         // Check result from interrupt with distance set, after delay ECHO_WAIT
         if (distance >= DISTANCE_LIMIT_LOW && (distance <= DISTANCE_SET || distance >= DISTANCE_LIMIT_HIGH)) {
@@ -290,8 +285,6 @@ void main(void) {
         }
 
 
-
-
         //------------------------------------------------
         //Calculate Safety Timers
         if (LIGHT_RELAY == Relay_on) {
@@ -305,7 +298,6 @@ void main(void) {
             TimerStateOff++;
 
         }
-
 
         //Check MAX values of Safety Timers for Light ON
         if ((TimerStateOn >= MAX_TIME_ON)) {
@@ -335,11 +327,10 @@ void main(void) {
             LIGHT_RELAY = Relay_off; //RELAY OFF
             HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
             MeasureModulePower = MeasureModulePower_off;
-            checkUltraSonicPowerforApply();
+            checkMeasureModulePowerforApply();
         }
 
-
-        //FLUSH ALL LAT PIN VALUES TO REAL PIN
+       //FLUSH ALL LAT PIN VALUES TO REAL PIN
         LATGPIO_FLUSH;
 
         //MAIN LOOP delay 
@@ -390,7 +381,7 @@ while (0) {
             MeasureModulePower = MeasureModulePower_off; //if door opened measuring not required
             states.HumanBodyButton_Pressed = false; //reset humman body button state                
             HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
-            checkUltraSonicPowerforApply();
+            checkMeasureModulePowerforApply();
         }
 
     } else if (countDebounceDoor <= -MAX_COUNT_TRY_DOOR) {
@@ -402,7 +393,7 @@ while (0) {
             DOORSTATES = DOORSTATES::closed; //DOOR_STATE_CLOSED;
             SafeOffRelay = false;
             MeasureModulePower = MeasureModulePower_on;
-            checkUltraSonicPowerforApply();
+            checkMeasureModulePowerforApply();
         }
     }
 
@@ -437,7 +428,7 @@ while (0) {
                 HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_ON;
                 LATGPIO_FLUSH;
                 MeasureModulePower = MeasureModulePower_off;
-                checkUltraSonicPowerforApply();
+                checkMeasureModulePowerforApply();
             } else if (countActionEmpty) {
                 NeedFlashAndBuzze = true;
             }
@@ -562,7 +553,7 @@ while (0) {
             MeasureModulePower = MeasureModulePower_off;
             HUMAN_BUTTON_LED = HUMAN_BUTTON_LED_OFF;
             states.HumanBodyButton_Pressed = false;
-            checkUltraSonicPowerforApply();
+            checkMeasureModulePowerforApply();
         }
     }
 
