@@ -20,11 +20,11 @@
 /* Main Program                                                               */
 /******************************************************************************/
 
-#define DISTANCE_LIMIT_LOW      2   //cm. Object present after this distance
+#define DISTANCE_LIMIT_LOW      4   //cm. Object present after this distance
 //    Object not present before this distance
 #define DISTANCE_LIMIT_HIGH     92 //cm  Object present after this distance
 //    Object not present before this distance
-#define DISTANCE_SET            60  //cm. Object present before this distance
+#define DISTANCE_SET            55  //cm. Object present before this distance
 //    Object not present after this distance
 // In General:
 // Object not present {0...DISTANCE_LIMIT_LOW} || {DISTANCE_SET...DISTANCE_LIMIT_HIGH} 

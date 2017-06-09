@@ -65,7 +65,7 @@ volatile union {
 #define ECHO_WAIT_PER_SEC       1000/ECHO_WAIT       //loops per second
 
 #define MAX_COUNT_TRY_PRESENT   ECHO_WAIT_PER_SEC*1  // 1 seconds  (7)   u8bit
-#define MAX_COUNT_TRY_EMPTY     ECHO_WAIT_PER_SEC*45 // 45 seconds  (315) u16bit
+#define MAX_COUNT_TRY_EMPTY     ECHO_WAIT_PER_SEC*20 // 20 seconds  (140) u16bit
 #define MAX_COUNT_TRY_DOOR      ECHO_WAIT_PER_SEC/3  // 1/3 seconds  (2)   u8bit
 #define MAX_COUNT_TRY_EMPTY_BEPPS   MAX_COUNT_TRY_EMPTY/4   //define 4 max beeps for all wait period
 #define SKEEP_BEPPS             ECHO_WAIT_PER_SEC*5;    //beeps every 8 sec u8bit
